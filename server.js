@@ -27,7 +27,9 @@ app.post('/api/generate-plan', async (req, res) => {
         const data = req.body;
         
         // Tạo Prompt chuyên gia
+        const langStr = data.language === 'en' ? 'ENGLISH (All content MUST be in English)' : 'VIETNAMESE (Tất cả kết quả phải bằng Tiếng Việt)';
         const prompt = `Bạn là một chuyên gia thiết kế tour du lịch cao cấp.
+Ngôn ngữ trả về bắt buộc: ${langStr}.
 Hãy lập một kế hoạch du lịch cực kỳ chi tiết tới: ${data.destination}.
 Thông tin chuyến đi:
 - Mục đích: ${data.purpose}
@@ -110,9 +112,11 @@ Chú ý:
 // Endpoint dùng cho việc User tự insert lịch trình (AI research mô tả)
 app.post('/api/research-activity', async (req, res) => {
     try {
-        const { destination, session, timeRange, title } = req.body;
+        const { destination, session, timeRange, title, language } = req.body;
+        const langStr = language === 'en' ? 'ENGLISH (Must be in English)' : 'VIETNAMESE (Bắt buộc bằng Tiếng Việt)';
         
         const prompt = `Viết một đoạn mô tả cực kỳ hấp dẫn, chân thực và súc tích (tối đa 3 câu) cho hoạt động tham quan/ăn uống tại: "${title}".
+Ngôn ngữ bắt buộc: ${langStr}.
 Điểm đến: ${destination}.
 Thời gian dự kiến: ${session} (${timeRange}).
 YÊU CẦU QUAN TRỌNG:

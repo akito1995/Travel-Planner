@@ -1,8 +1,189 @@
 window.currentPlanData = null;
 window.placesMap = null;
 window.itineraryMap = null;
+window.currentLang = 'vi';
+
+const translations = {
+    vi: {
+        pageTitle: "Coca Planner - Chuyên Gia Lên Kế Hoạch Du Lịch",
+        heroSubtitle: "Chuyên gia AI giúp bạn lên kế hoạch du lịch hoàn chỉnh, thực tế và tối ưu nhất.",
+        btnStart: "Bắt Đầu Lên Kế Hoạch",
+        formTitle: "Cung cấp thông tin chuyến đi",
+        qDestination: "Bạn muốn đi đâu?",
+        pDestination: "VD: Đà Lạt, Nha Trang, Tokyo...",
+        qDeparture: "Bạn xuất phát từ đâu?",
+        pDeparture: "VD: TP.HCM, Hà Nội...",
+        qDuration: "Thời gian chuyến đi?",
+        lStartDate: "Ngày đi",
+        lEndDate: "Ngày về",
+        qPeople: "Có bao nhiêu người đi?",
+        lAdults: "Người lớn",
+        pAdults: "Từ 12 tuổi",
+        lChildren: "Trẻ em",
+        pChildren: "Dưới 12 tuổi",
+        qBudget: "Ngân sách dự kiến / người (VNĐ)?",
+        pBudget: "VD: 5,000,000",
+        hBudget: "Nhập số tiền ước tính cho 1 người (đã bao gồm vé xe/máy bay).",
+        qPurpose: "Mục đích chuyến đi?",
+        optPurposeDefault: "Chọn mục đích",
+        optPurpose1: "Công tác",
+        optPurpose2: "Nghỉ dưỡng",
+        optPurpose3: "Tham quan",
+        optPurpose4: "Khám phá",
+        qPreferences: "Sở thích hoặc lưu ý đặc biệt?",
+        pPreferences: "VD: Thích ăn hải sản, không leo núi, bị say xe...",
+        btnBack: "Quay lại",
+        btnNext: "Tiếp theo",
+        btnSubmit: "Tạo Kế Hoạch",
+        loadingTitle: "Đang phân tích dữ liệu...",
+        loadingSub: "Đang lên kế hoạch chuyến đi...",
+        explorePrefix: "Khám Phá",
+        btnICS: "Xuất Lịch",
+        btnPDF: "Tải PDF",
+        btnRestart: "Làm lại",
+        daysLabel: "ngày",
+        peopleLabel: "người",
+        perPersonLabel: "người",
+        btnSkyscanner: "Skyscanner",
+        btnTrip: "Trip.com",
+        btnBooking: "Booking.com",
+        btnKlook: "Klook",
+        tabOverview: "Tổng Quan & Thời Tiết",
+        tabVisa: "Tư Vấn Visa / Giấy Tờ",
+        tabItinerary: "Lịch Trình Chi Tiết",
+        tabPlaces: "Lưu Trú & Ẩm Thực",
+        tabCost: "Dự Toán Chi Phí",
+        tabHandbook: "Sổ Tay",
+        titleOverview: "Tổng Quan Điểm Đến",
+        titleWeather: "Thời Điểm & Thời Tiết",
+        titleEvents: "Sự Kiện Nổi Bật",
+        titleVisa: "Thông Tin Visa & Giấy Tờ",
+        titleHotels: "Gợi Ý Lưu Trú",
+        titleFoods: "Gợi Ý Ẩm Thực",
+        titleCost: "Bảng Dự Toán Chi Phí Tối Ưu",
+        liveRateTitle: "Tỷ giá tham khảo (Live):",
+        thItem: "Hạng Mục",
+        thDetail: "Chi Tiết",
+        thPrice: "Chi Phí / Người",
+        thTotal: "Tổng Cộng Ước Tính",
+        titleHandbook: "SỔ TAY DU LỊCH",
+        modalTitle: "Thêm Hoạt Động Mới",
+        modalTitleInput: "Tiêu đề / Địa điểm",
+        pModalTitle: "VD: Tham quan bảo tàng Louvre",
+        modalSession: "Buổi",
+        sessMorning: "Sáng",
+        sessNoon: "Trưa",
+        sessAfternoon: "Chiều",
+        sessEvening: "Tối",
+        modalTime: "Thời gian",
+        btnCancel: "Hủy",
+        btnSave: "Lưu (AI Tự Động Mô Tả)"
+    },
+    en: {
+        pageTitle: "Coca Planner - AI Travel Expert",
+        heroSubtitle: "Your AI expert for creating complete, practical, and optimized travel itineraries.",
+        btnStart: "Start Planning",
+        formTitle: "Provide your trip details",
+        qDestination: "Where do you want to go?",
+        pDestination: "E.g: Da Lat, Nha Trang, Tokyo...",
+        qDeparture: "Where are you departing from?",
+        pDeparture: "E.g: HCMC, Hanoi...",
+        qDuration: "Trip duration?",
+        lStartDate: "Start Date",
+        lEndDate: "End Date",
+        qPeople: "How many people are going?",
+        lAdults: "Adults",
+        pAdults: "12+ years",
+        lChildren: "Children",
+        pChildren: "Under 12",
+        qBudget: "Estimated Budget / Person (VND)?",
+        pBudget: "E.g: 5,000,000",
+        hBudget: "Enter estimated amount for 1 person (including transport).",
+        qPurpose: "Purpose of the trip?",
+        optPurposeDefault: "Select purpose",
+        optPurpose1: "Business",
+        optPurpose2: "Relaxation",
+        optPurpose3: "Sightseeing",
+        optPurpose4: "Exploration",
+        qPreferences: "Preferences or special notes?",
+        pPreferences: "E.g: Love seafood, no hiking, motion sickness...",
+        btnBack: "Back",
+        btnNext: "Next",
+        btnSubmit: "Generate Plan",
+        loadingTitle: "Analyzing data...",
+        loadingSub: "Creating your travel plan...",
+        explorePrefix: "Explore",
+        btnICS: "Export ICS",
+        btnPDF: "Download PDF",
+        btnRestart: "Start Over",
+        daysLabel: "days",
+        peopleLabel: "people",
+        perPersonLabel: "person",
+        btnSkyscanner: "Skyscanner",
+        btnTrip: "Trip.com",
+        btnBooking: "Booking.com",
+        btnKlook: "Klook",
+        tabOverview: "Overview & Weather",
+        tabVisa: "Visa & Docs",
+        tabItinerary: "Detailed Itinerary",
+        tabPlaces: "Stays & Food",
+        tabCost: "Estimated Cost",
+        tabHandbook: "Handbook",
+        titleOverview: "Destination Overview",
+        titleWeather: "Best Time & Weather",
+        titleEvents: "Notable Events",
+        titleVisa: "Visa & Document Info",
+        titleHotels: "Accommodation Suggestions",
+        titleFoods: "Culinary Suggestions",
+        titleCost: "Cost Estimation Table",
+        liveRateTitle: "Live Exchange Rate:",
+        thItem: "Category",
+        thDetail: "Details",
+        thPrice: "Cost / Person",
+        thTotal: "Total Estimated",
+        titleHandbook: "TRAVEL HANDBOOK",
+        modalTitle: "Add New Activity",
+        modalTitleInput: "Title / Location",
+        pModalTitle: "E.g: Visit Louvre Museum",
+        modalSession: "Session",
+        sessMorning: "Morning",
+        sessNoon: "Noon",
+        sessAfternoon: "Afternoon",
+        sessEvening: "Evening",
+        modalTime: "Time",
+        btnCancel: "Cancel",
+        btnSave: "Save (AI Description)"
+    }
+};
+
+function updateLanguage(lang) {
+    window.currentLang = lang;
+    document.documentElement.lang = lang;
+    const elements = document.querySelectorAll('[data-i18n]');
+    elements.forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if(translations[lang][key]) {
+            el.innerHTML = translations[lang][key];
+        }
+    });
+
+    const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+    placeholders.forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if(translations[lang][key]) {
+            el.placeholder = translations[lang][key];
+        }
+    });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
+    const langSelect = document.getElementById('lang-select');
+    if (langSelect) {
+        langSelect.addEventListener('change', (e) => {
+            updateLanguage(e.target.value);
+        });
+    }
+
     // DOM Elements
     const views = {
         landing: document.getElementById('landing-page'),
@@ -111,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const formData = {
+            language: window.currentLang,
             destination: document.getElementById('destination').value,
             departure: document.getElementById('departure').value,
             days: days,
@@ -638,7 +820,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await fetch('/api/research-activity', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ destination, session, timeRange, title })
+                body: JSON.stringify({ destination, session, timeRange, title, language: window.currentLang })
             });
             const data = await res.json();
             
