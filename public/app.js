@@ -449,8 +449,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Overview
         document.getElementById('overview-text').textContent = data.overview.description;
-        document.getElementById('weather-text').textContent = data.overview.weather;
+        document.getElementById('weather-text').innerHTML = formatPriceString(data.overview.weather);
         document.getElementById('events-list').innerHTML = data.overview.events.map(e => `<li>${e}</li>`).join('');
+
+        // Fetch Unsplash Image
+        const unsplashBanner = document.getElementById('unsplash-banner');
+        const unsplashImg = document.getElementById('unsplash-img');
+        if (unsplashBanner && unsplashImg) {
+            unsplashBanner.style.display = 'none'; // reset
+            fetch('/api/image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: data.input.destination + " landmark" })
+            })
+            .then(res => res.json())
+            .then(imgData => {
+                if (imgData.imageUrl) {
+                    unsplashImg.src = imgData.imageUrl;
+                    unsplashBanner.style.display = 'block';
+                }
+            })
+            .catch(err => console.error(err));
+        }
 
         // Setup Affiliate Links
         const destQuery = encodeURIComponent(window.currentPlanData.input.destination);

@@ -177,6 +177,28 @@ ${JSON.stringify(planData)}
     }
 });
 
+// Endpoint dùng để kéo ảnh từ Unsplash
+app.post('/api/image', async (req, res) => {
+    try {
+        const { query } = req.body;
+        // Unsplash API Key từ user
+        const unsplashKey = "1fP-nn2pZ4hUUnQEUjZAcGW-DPf57G0J37qv9iIJzBg";
+        const url = `https://api.unsplash.com/search/photos?page=1&per_page=1&query=${encodeURIComponent(query)}&orientation=landscape&client_id=${unsplashKey}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.results && data.results.length > 0) {
+            res.json({ imageUrl: data.results[0].urls.regular });
+        } else {
+            res.json({ imageUrl: "" });
+        }
+    } catch (error) {
+        console.error("Lỗi khi kéo ảnh Unsplash:", error);
+        res.json({ imageUrl: "" });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running beautifully on http://localhost:${PORT}`);
