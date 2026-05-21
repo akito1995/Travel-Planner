@@ -306,11 +306,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('start-btn').addEventListener('click', () => switchView('form'));
     document.getElementById('restart-btn').addEventListener('click', () => {
+        // Clear url if exists
+        if (window.history.pushState) {
+            window.history.pushState({}, document.title, window.location.pathname);
+        }
         document.getElementById('travel-form').reset();
         currentStep = 1;
         updateFormView();
         switchView('form');
     });
+
+    document.getElementById('btn-share').addEventListener('click', async () => {
+        const btn = document.getElementById('btn-share');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tạo link...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/save-plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ planData: window.currentPlanData })
+            });
+            const data = await res.json();
+            if (data.id) {
+                const shareUrl = window.location.origin + window.location.pathname + '?trip=' + data.id;
+                await navigator.clipboard.writeText(shareUrl);
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Đã Copy Link!';
+                if (window.history.pushState) {
+                    window.history.pushState({}, document.title, '?trip=' + data.id);
+                }
+            } else {
+                alert('Lỗi: ' + data.error);
+                btn.innerHTML = originalText;
+            }
+        } catch (e) {
+            alert('Lỗi kết nối: ' + e.message);
+            btn.innerHTML = originalText;
+        }
+
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 3000);
+    });
+
+    // Check URL Params for shared trip
+    const urlParams = new URLSearchParams(window.location.search);
+    const tripId = urlParams.get('trip');
+    if (tripId) {
+        switchView('loading');
+        fetch('/api/plan/' + tripId)
+            .then(res => res.json())
+            .then(data => {
+                if (data.planData) {
+                    window.currentPlanData = data.planData;
+                    renderDashboard(window.currentPlanData);
+                    switchView('result');
+                } else {
+                    alert('Lịch trình này không tồn tại hoặc đã bị xóa.');
+                    switchView('landing');
+                }
+            })
+            .catch(e => {
+                alert('Lỗi tải lịch trình: ' + e.message);
+                switchView('landing');
+            });
+    }
 
     // Form Logic
     const formGroups = document.querySelectorAll('.form-group');

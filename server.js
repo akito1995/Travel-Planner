@@ -1,9 +1,23 @@
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const { GoogleGenAI } = require('@google/genai');
 require('dotenv').config();
 
 const app = express();
+
+// Kết nối MongoDB Atlas
+const mongoURI = "mongodb+srv://admin:Daibang%4095@cocaplanner.i0px7ya.mongodb.net/CocaPlannerDB?retryWrites=true&w=majority&appName=CocaPlanner";
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('✅ Connected to MongoDB Atlas'))
+    .catch(err => console.error('❌ MongoDB Connection Error:', err));
+
+// Schema cho Lịch trình
+const planSchema = new mongoose.Schema({
+    planData: { type: Object, required: true },
+    createdAt: { type: Date, default: Date.now, expires: '30d' } // Tự động xóa sau 30 ngày để tiết kiệm dung lượng
+});
+const Plan = mongoose.model('Plan', planSchema);
 
 // Middleware
 app.use(cors());
@@ -222,6 +236,34 @@ app.post('/api/weather', async (req, res) => {
     } catch (error) {
         console.error("Lỗi thời tiết:", error);
         res.json({ error: error.message });
+    }
+});
+
+// Endpoint lưu kế hoạch vào MongoDB
+app.post('/api/save-plan', async (req, res) => {
+    try {
+        const { planData } = req.body;
+        const newPlan = new Plan({ planData });
+        const savedPlan = await newPlan.save();
+        res.json({ id: savedPlan._id });
+    } catch (err) {
+        console.error("Lỗi khi lưu kế hoạch:", err);
+        res.status(500).json({ error: "Không thể lưu kế hoạch" });
+    }
+});
+
+// Endpoint lấy kế hoạch từ MongoDB
+app.get('/api/plan/:id', async (req, res) => {
+    try {
+        const plan = await Plan.findById(req.params.id);
+        if (plan) {
+            res.json({ planData: plan.planData });
+        } else {
+            res.status(404).json({ error: "Không tìm thấy kế hoạch" });
+        }
+    } catch (err) {
+        console.error("Lỗi khi lấy kế hoạch:", err);
+        res.status(500).json({ error: "Lỗi hệ thống" });
     }
 });
 
