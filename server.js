@@ -150,8 +150,7 @@ Chú ý:
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
-                tools: [{ googleSearch: {} }],
-                responseMimeType: 'application/json'
+                tools: [{ googleSearch: {} }]
             }
         });
 
