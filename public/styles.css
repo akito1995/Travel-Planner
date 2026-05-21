@@ -828,6 +828,7 @@ button {
     font-family: var(--font-heading);
 }
 
+/* Mobile Optimizations */
 @media (max-width: 768px) {
     .header-content { flex-direction: column; gap: 15px; text-align: center; margin-top: 40px; }
     .input-row { flex-direction: column; }
@@ -843,4 +844,45 @@ button {
         transform: translateX(50%);
         white-space: nowrap;
     }
+
+    .hero h1 { font-size: 2.5rem; }
+    .hero p { font-size: 1rem; }
+    .features { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .result-header { flex-direction: column; text-align: center; gap: 10px; }
+    .step-indicator { flex-direction: column; gap: 5px; }
+    .progress-line { display: none; }
+    .tab-nav { overflow-x: auto; white-space: nowrap; padding-bottom: 10px; justify-content: flex-start; }
+    .tab-btn { flex-shrink: 0; }
+    
+    /* Sticky Affiliate Banners on Mobile */
+    .action-banner {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255,255,255,0.95);
+        padding: 10px 15px;
+        z-index: 9999;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        margin-bottom: 0 !important;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        justify-content: flex-start !important;
+    }
+    
+    [data-theme="dark"] .action-banner {
+        background: rgba(27, 38, 59, 0.95);
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Đệm thêm khoảng trống dưới body để không bị banner che nội dung */
+    body { padding-bottom: 70px; }
+}
+
+@media print {
+    .no-print { display: none !important; }
+    body { background: white; color: black; padding-bottom: 0; }
+    .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+    .tab-content { display: block !important; opacity: 1 !important; visibility: visible !important; }
 }
