@@ -199,6 +199,32 @@ app.post('/api/image', async (req, res) => {
     }
 });
 
+// Endpoint kéo thời tiết từ OpenWeatherMap
+app.post('/api/weather', async (req, res) => {
+    try {
+        const { city, lang } = req.body;
+        const weatherKey = "f006aa73a0d6d53bf76f72cf9f6d34d8";
+        const langCode = lang === 'en' ? 'en' : 'vi';
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${weatherKey}&units=metric&lang=${langCode}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.main && data.weather) {
+            res.json({
+                temp: Math.round(data.main.temp),
+                description: data.weather[0].description,
+                icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`
+            });
+        } else {
+            res.json({ error: "No data" });
+        }
+    } catch (error) {
+        console.error("Lỗi thời tiết:", error);
+        res.json({ error: error.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running beautifully on http://localhost:${PORT}`);

@@ -472,6 +472,31 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.error(err));
         }
 
+        // Fetch Live Weather
+        const liveWeatherContainer = document.getElementById('live-weather');
+        const liveWeatherIcon = document.getElementById('live-weather-icon');
+        const liveWeatherTemp = document.getElementById('live-weather-temp');
+        const liveWeatherDesc = document.getElementById('live-weather-desc');
+        
+        if (liveWeatherContainer) {
+            liveWeatherContainer.style.display = 'none'; // reset
+            fetch('/api/weather', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ city: data.input.destination, lang: window.currentLang })
+            })
+            .then(res => res.json())
+            .then(weatherData => {
+                if (!weatherData.error) {
+                    liveWeatherIcon.src = weatherData.icon;
+                    liveWeatherTemp.textContent = weatherData.temp + '°C';
+                    liveWeatherDesc.textContent = weatherData.description;
+                    liveWeatherContainer.style.display = 'flex';
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
         // Setup Affiliate Links
         const destQuery = encodeURIComponent(window.currentPlanData.input.destination);
         const sd = window.currentPlanData.input.startDate;
