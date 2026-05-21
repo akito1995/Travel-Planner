@@ -143,6 +143,40 @@ VD: { "desc": "Thưởng thức ly cà phê ấm nóng và ngắm nhìn...", "la
     }
 });
 
+// Endpoint dùng để dịch nguyên xi một bản kế hoạch đang có sang ngôn ngữ mới
+app.post('/api/translate-plan', async (req, res) => {
+    try {
+        const { planData, targetLanguage } = req.body;
+        const langStr = targetLanguage === 'en' ? 'ENGLISH' : 'VIETNAMESE';
+        
+        const prompt = `Dưới đây là một kế hoạch du lịch bằng định dạng JSON.
+Hãy dịch TOÀN BỘ các giá trị văn bản (string) trong JSON này sang ngôn ngữ: ${langStr}.
+YÊU CẦU QUAN TRỌNG:
+1. GIỮ NGUYÊN 100% cấu trúc JSON, giữ nguyên các mảng, các khóa (keys).
+2. GIỮ NGUYÊN các giá trị số (như tọa độ lat, lng, day, ngân sách).
+3. KHÔNG THAY ĐỔI nội dung địa điểm, không bịa thêm lịch trình. Trình tự từ A sang B phải y hệt như cũ, chỉ dịch chữ.
+4. TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON HỢP LỆ, KHÔNG BAO GỒM MARKDOWN BLOCK (\`\`\`json).
+
+JSON GỐC:
+${JSON.stringify(planData)}
+`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt
+        });
+
+        let text = response.text || '';
+        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const translatedData = JSON.parse(text);
+        
+        res.json(translatedData);
+    } catch (error) {
+        console.error("Lỗi khi dịch bản kế hoạch:", error);
+        res.status(500).json({ error: 'Lỗi khi dịch bản kế hoạch.' });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running beautifully on http://localhost:${PORT}`);

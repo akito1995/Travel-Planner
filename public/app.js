@@ -179,20 +179,50 @@ function updateLanguage(lang) {
 document.addEventListener('DOMContentLoaded', () => {
     const langSelect = document.getElementById('lang-select');
     if (langSelect) {
-        langSelect.addEventListener('change', (e) => {
+        langSelect.addEventListener('change', async (e) => {
             const newLang = e.target.value;
             const oldLang = window.currentLang;
             
-            // Nếu đang ở màn hình kết quả, cần AI gen lại
+            // Nếu đang ở màn hình kết quả, cần AI dịch lại
             if (window.currentPlanData && document.getElementById('result-page').classList.contains('active')) {
                 const confirmMsg = newLang === 'en' 
-                    ? "Changing language requires the AI to re-generate your itinerary. Do you want to proceed?" 
-                    : "Đổi ngôn ngữ yêu cầu AI phải viết lại toàn bộ lịch trình. Bạn có muốn tiếp tục không?";
+                    ? "Changing language requires the AI to translate your entire itinerary. Do you want to proceed?" 
+                    : "Đổi ngôn ngữ yêu cầu AI phải dịch lại toàn bộ lịch trình. Bạn có muốn tiếp tục không?";
                 if (confirm(confirmMsg)) {
+                    // Show loading UI
                     updateLanguage(newLang);
                     initDatePickers(newLang);
-                    // Tự động submit lại form
-                    document.getElementById('travel-form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                    views.result.classList.remove('active');
+                    views.loading.classList.add('active');
+                    
+                    try {
+                        const res = await fetch('/api/translate-plan', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                planData: window.currentPlanData, 
+                                targetLanguage: newLang 
+                            })
+                        });
+                        const data = await res.json();
+                        
+                        if (data.error) throw new Error(data.error);
+                        
+                        // Cập nhật lại dữ liệu và render
+                        window.currentPlanData = data;
+                        renderDashboard(window.currentPlanData);
+                        
+                        views.loading.classList.remove('active');
+                        views.result.classList.add('active');
+                    } catch(err) {
+                        alert("Lỗi khi dịch: " + err.message);
+                        views.loading.classList.remove('active');
+                        views.result.classList.add('active');
+                        // Hoàn tác
+                        langSelect.value = oldLang;
+                        updateLanguage(oldLang);
+                        initDatePickers(oldLang);
+                    }
                 } else {
                     // Hoàn tác
                     e.target.value = oldLang;
