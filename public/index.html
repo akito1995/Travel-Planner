@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coca Planner - Chuyên Gia Lên Kế Hoạch Du Lịch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- HTML2PDF for generating PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+    <!-- Landing Page -->
+    <div id="landing-page" class="view-section active">
+        <div class="hero">
+            <div class="glass-panel">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="logo.png" alt="Coca Planner" style="width: 120px; height: 120px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                </div>
+                <h1 class="hero-title"><span class="highlight">Coca Planner</span></h1>
+                <p class="hero-subtitle">Chuyên gia AI giúp bạn lên kế hoạch du lịch hoàn chỉnh, thực tế và tối ưu nhất.</p>
+                <button id="start-btn" class="primary-btn">Bắt Đầu Lên Kế Hoạch <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Planner Form (Step 1) -->
+    <div id="form-page" class="view-section">
+        <div class="container">
+            <div class="form-wrapper glass-panel">
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <img src="logo.png" alt="Coca Planner" style="width: 60px; height: 60px; border-radius: 12px;">
+                </div>
+                <h2>Cung cấp thông tin chuyến đi</h2>
+                <div class="progress-bar">
+                    <div class="progress" id="form-progress"></div>
+                </div>
+                
+                <form id="travel-form">
+                    <!-- Q1: Điểm đến -->
+                    <div class="form-group active" data-step="1">
+                        <label for="destination"><i class="fa-solid fa-location-dot"></i> Bạn muốn đi đâu?</label>
+                        <input type="text" id="destination" placeholder="VD: Đà Lạt, Nha Trang, Tokyo..." required>
+                    </div>
+
+                    <!-- Q2: Điểm khởi hành (Updated requirement) -->
+                    <div class="form-group" data-step="2">
+                        <label for="departure"><i class="fa-solid fa-plane-departure"></i> Bạn xuất phát từ đâu?</label>
+                        <input type="text" id="departure" placeholder="VD: TP.HCM, Hà Nội..." value="TP.HCM (Việt Nam)" required>
+                    </div>
+
+                    <!-- Q3: Thời gian -->
+                    <div class="form-group" data-step="3">
+                        <label for="duration"><i class="fa-regular fa-calendar"></i> Thời gian chuyến đi?</label>
+                        <div class="input-row">
+                            <div class="input-col">
+                                <small>Số ngày</small>
+                                <input type="number" id="days" placeholder="VD: 3" min="1" required>
+                            </div>
+                            <div class="input-col">
+                                <small>Ngày khởi hành</small>
+                                <input type="date" id="start-date" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q4: Số người -->
+                    <div class="form-group" data-step="4">
+                        <label for="people"><i class="fa-solid fa-user-group"></i> Có bao nhiêu người đi?</label>
+                        <div class="input-row">
+                            <div class="input-col">
+                                <small>Người lớn</small>
+                                <input type="number" id="adults" placeholder="Từ 12 tuổi" min="1" required>
+                            </div>
+                            <div class="input-col">
+                                <small>Trẻ em</small>
+                                <input type="number" id="children" placeholder="Dưới 12 tuổi" min="0" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q5: Ngân sách -->
+                    <div class="form-group" data-step="5">
+                        <label for="budget"><i class="fa-solid fa-wallet"></i> Ngân sách dự kiến / người (VNĐ)?</label>
+                        <input type="text" inputmode="numeric" id="budget" placeholder="VD: 5,000,000" required>
+                        <small class="hint">Nhập số tiền ước tính cho 1 người (đã bao gồm vé xe/máy bay).</small>
+                    </div>
+
+                    <!-- Q6: Mục đích (Updated requirement) -->
+                    <div class="form-group" data-step="6">
+                        <label for="purpose"><i class="fa-solid fa-bullseye"></i> Mục đích chuyến đi?</label>
+                        <select id="purpose" required>
+                            <option value="" disabled selected>Chọn mục đích</option>
+                            <option value="Công tác">Công tác</option>
+                            <option value="Nghỉ dưỡng">Nghỉ dưỡng</option>
+                            <option value="Tham quan">Tham quan</option>
+                            <option value="Khám phá">Khám phá</option>
+                        </select>
+                    </div>
+
+                    <!-- Q7: Sở thích / Kỵ -->
+                    <div class="form-group" data-step="7">
+                        <label for="preferences"><i class="fa-solid fa-heart"></i> Sở thích hoặc lưu ý đặc biệt?</label>
+                        <textarea id="preferences" rows="3" placeholder="VD: Thích ăn hải sản, không leo núi, bị say xe..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="prev-btn" class="secondary-btn hidden">Quay lại</button>
+                        <button type="button" id="next-btn" class="primary-btn">Tiếp theo</button>
+                        <button type="submit" id="submit-btn" class="primary-btn hidden">Tạo Kế Hoạch <i class="fa-solid fa-wand-magic-sparkles"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading-page" class="view-section">
+        <div class="loader-container">
+            <div class="spinner"></div>
+            <h2 class="loader-text">Đang phân tích dữ liệu...</h2>
+            <p id="loading-subtext">Đang lên kế hoạch chuyến đi...</p>
+        </div>
+    </div>
+
+    <!-- Result Dashboard -->
+    <div id="result-page" class="view-section">
+        <div class="dashboard-header">
+            <div class="header-content">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="logo.png" alt="Coca Planner" style="width: 40px; height: 40px; border-radius: 8px;">
+                    <h2 style="margin: 0; color: var(--primary-blue);">Coca Planner</h2>
+                    <h2 style="margin: 0; font-weight: 300; opacity: 0.5; display: none;" class="desktop-only">|</h2>
+                    <h2 style="margin: 0;" class="desktop-only">Khám Phá <span id="res-destination"></span></h2>
+                </div>
+                <div class="action-buttons">
+                    <button id="download-pdf-btn" class="secondary-btn"><i class="fa-solid fa-download"></i> Tải PDF / In</button>
+                    <button id="restart-btn" class="ghost-btn"><i class="fa-solid fa-rotate-right"></i> Làm lại</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard-container" id="pdf-content">
+            <!-- Tóm tắt đầu trang -->
+            <div class="summary-banner">
+                <div class="summary-item"><i class="fa-regular fa-calendar"></i> <span id="res-date"></span> (<span id="res-days"></span> ngày)</div>
+                <div class="summary-item"><i class="fa-solid fa-user-group"></i> <span id="res-people"></span> người</div>
+                <div class="summary-item"><i class="fa-solid fa-wallet"></i> <span id="res-budget"></span>/người</div>
+                <div class="summary-item"><i class="fa-solid fa-bullseye"></i> <span id="res-purpose"></span></div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs no-print">
+                <button class="tab-btn active" data-tab="tab-overview">Tổng Quan & Thời Tiết</button>
+                <button class="tab-btn" data-tab="tab-visa">Tư Vấn Visa / Giấy Tờ</button>
+                <button class="tab-btn" data-tab="tab-itinerary">Lịch Trình Chi Tiết</button>
+                <button class="tab-btn" data-tab="tab-places">Lưu Trú & Ẩm Thực</button>
+                <button class="tab-btn" data-tab="tab-cost">Dự Toán Chi Phí</button>
+                <button class="tab-btn" data-tab="tab-handbook">Sổ Tay</button>
+            </div>
+
+            <!-- Tab: Overview (Bước 2) -->
+            <div id="tab-overview" class="tab-content active">
+                <div class="card">
+                    <h3><i class="fa-solid fa-map-location-dot"></i> Tổng Quan Điểm Đến</h3>
+                    <p id="overview-text"></p>
+                </div>
+                <div class="card-grid">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-cloud-sun"></i> Thời Điểm & Thời Tiết</h3>
+                        <p id="weather-text"></p>
+                    </div>
+                    <div class="card">
+                        <h3><i class="fa-solid fa-calendar-star"></i> Sự Kiện Nổi Bật</h3>
+                        <ul id="events-list"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Visa (Bước 3) -->
+            <div id="tab-visa" class="tab-content">
+                <div class="card">
+                    <h3><i class="fa-solid fa-passport"></i> Thông Tin Visa & Giấy Tờ</h3>
+                    <div id="visa-content"></div>
+                </div>
+            </div>
+
+            <!-- Tab: Itinerary (Bước 4) -->
+            <div id="tab-itinerary" class="tab-content">
+                <div class="itinerary-timeline" id="itinerary-content">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Tab: Places (Bước 5) -->
+            <div id="tab-places" class="tab-content">
+                <h3><i class="fa-solid fa-bed"></i> Gợi Ý Lưu Trú</h3>
+                <div class="places-grid" id="hotel-content">
+                    <!-- Rendered by JS -->
+                </div>
+                
+                <h3 class="mt-4"><i class="fa-solid fa-utensils"></i> Gợi Ý Ẩm Thực (Đặc Sản & Địa Phương)</h3>
+                <div class="places-grid" id="food-content">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Tab: Cost (Bước 6) -->
+            <div id="tab-cost" class="tab-content">
+                <div class="card">
+                    <h3><i class="fa-solid fa-file-invoice-dollar"></i> Bảng Dự Toán Chi Phí Tối Ưu</h3>
+                    <div class="table-responsive">
+                        <table class="cost-table">
+                            <thead>
+                                <tr>
+                                    <th>Hạng Mục</th>
+                                    <th>Chi Tiết</th>
+                                    <th>Chi Phí / Người</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cost-table-body">
+                                <!-- Rendered by JS -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="2">Tổng Cộng Ước Tính</th>
+                                    <th id="total-cost" class="total-amount"></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Handbook (Bước 8) -->
+            <div id="tab-handbook" class="tab-content handbook-view">
+                <div class="handbook-cover">
+                    <h2>SỔ TAY DU LỊCH</h2>
+                    <h1 id="hb-destination"></h1>
+                    <p id="hb-date-people"></p>
+                </div>
+                <div class="handbook-pages" id="handbook-content">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Thêm/Sửa Hoạt động -->
+    <div id="activity-modal" class="modal-overlay">
+        <div class="modal-content glass-panel">
+            <h3 id="modal-title">Thêm Hoạt Động Mới</h3>
+            <form id="activity-form">
+                <input type="hidden" id="modal-day-index">
+                <input type="hidden" id="modal-act-index">
+                
+                <div class="form-group active" style="display:block;">
+                    <label>Tiêu đề / Địa điểm</label>
+                    <input type="text" id="modal-act-title" placeholder="VD: Tham quan bảo tàng Louvre" required>
+                </div>
+                
+                <div class="input-row" style="margin-bottom: 15px;">
+                    <div class="input-col">
+                        <label>Buổi</label>
+                        <select id="modal-act-session" style="padding:10px; border-radius:8px; border:1px solid #ccc; width:100%;" required>
+                            <option value="Sáng">Sáng</option>
+                            <option value="Trưa">Trưa</option>
+                            <option value="Chiều">Chiều</option>
+                            <option value="Tối">Tối</option>
+                        </select>
+                    </div>
+                    <div class="input-col">
+                        <label>Thời gian</label>
+                        <input type="text" id="modal-act-time" placeholder="VD: 09:00 - 11:00" style="padding:10px; border-radius:8px; border:1px solid #ccc; width:100%;" required>
+                    </div>
+                </div>
+
+                <div class="form-actions" style="margin-top:20px;">
+                    <button type="button" id="modal-cancel-btn" class="ghost-btn">Hủy</button>
+                    <button type="submit" id="modal-save-btn" class="primary-btn">Lưu (AI Tự Động Mô Tả)</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="watermark no-print">
+        Made by <span>Nguyễn Hải Long</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
