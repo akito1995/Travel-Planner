@@ -236,19 +236,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Init Date Pickers
     function initDatePickers(lang) {
-        flatpickr("#start-date", {
+        let endDatePicker = flatpickr("#end-date", {
             dateFormat: "Y-m-d",
             altInput: true,
             altFormat: "d/m/Y",
             minDate: "today",
             locale: lang === 'vi' ? "vn" : "default"
         });
-        flatpickr("#end-date", {
+
+        flatpickr("#start-date", {
             dateFormat: "Y-m-d",
             altInput: true,
             altFormat: "d/m/Y",
             minDate: "today",
-            locale: lang === 'vi' ? "vn" : "default"
+            locale: lang === 'vi' ? "vn" : "default",
+            onChange: function(selectedDates) {
+                if (selectedDates.length > 0) {
+                    endDatePicker.set("minDate", selectedDates[0]);
+                    endDatePicker.jumpToDate(selectedDates[0]);
+                }
+            }
         });
     }
     initDatePickers(window.currentLang);
