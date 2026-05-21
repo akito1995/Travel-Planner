@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('link-skyscanner').href = `https://www.skyscanner.com/transport/flights-from/vn/?destination=${destQuery}`;
         document.getElementById('link-tripcom').href = `https://vn.trip.com/hotels/list?city=1&cityName=${destQuery}`;
         document.getElementById('link-booking').href = `https://www.booking.com/searchresults.html?ss=${destQuery}`;
-        document.getElementById('link-klook').href = `https://www.klook.com/vi/search/result/?query=${destQuery}`;
+        document.getElementById('link-klook').href = `https://klook.tpx.lv/Z2t2ILK7`;
 
         // Tab: Visa
         document.getElementById('visa-content').innerHTML = `
