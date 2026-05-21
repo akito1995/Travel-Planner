@@ -165,10 +165,25 @@ Chú ý:
         // Xử lý dữ liệu trả về để parse JSON
         let text = response.text || '';
         // Làm sạch Markdown JSON block nếu AI cố tình trả về
-        text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        
+        // Trích xuất JSON từ chuỗi (bỏ qua mọi text lằng nhằng phía trước/sau)
+        const firstBrace = text.indexOf('{');
+        const lastBrace = text.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1) {
+            text = text.substring(firstBrace, lastBrace + 1);
+        }
+
+        // Xóa dấu phẩy thừa ở cuối mảng/object (lỗi phổ biến của AI)
         text = text.replace(/,\s*([\]}])/g, '$1');
         
-        const planData = JSON.parse(text);
+        let planData;
+        try {
+            planData = JSON.parse(text);
+        } catch (parseError) {
+            console.error("Lỗi Parse JSON:", parseError, text.substring(0, 100) + "...");
+            return res.status(500).json({ error: "Lỗi định dạng dữ liệu từ AI. Vui lòng thử lại!" });
+        }
 
         res.json(planData);
 

@@ -488,8 +488,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderDashboard(planData);
             switchView('result');
         } catch (error) {
+            alert(error.message || "Lỗi khi kết nối với AI. Vui lòng thử lại.");
             console.error(error);
-            alert("Lỗi khi kết nối với AI. Vui lòng kiểm tra lại server Node.js hoặc API Key.");
             switchView('form');
         }
     });
