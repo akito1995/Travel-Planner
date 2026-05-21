@@ -150,7 +150,8 @@ Chú ý:
             model: 'gemini-2.5-flash',
             contents: prompt,
             config: {
-                tools: [{ googleSearch: {} }]
+                tools: [{ googleSearch: {} }],
+                responseMimeType: 'application/json'
             }
         });
 
@@ -158,6 +159,7 @@ Chú ý:
         let text = response.text || '';
         // Làm sạch Markdown JSON block nếu AI cố tình trả về
         text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        text = text.replace(/,\s*([\]}])/g, '$1');
         
         const planData = JSON.parse(text);
 
@@ -223,11 +225,18 @@ ${JSON.stringify(planData)}
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: prompt
+            contents: prompt,
+            config: {
+                responseMimeType: 'application/json'
+            }
         });
 
         let text = response.text || '';
         text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        
+        // Remove trailing commas if any (common JSON error from AI)
+        text = text.replace(/,\s*([\]}])/g, '$1');
+        
         const translatedData = JSON.parse(text);
         
         res.json(translatedData);
