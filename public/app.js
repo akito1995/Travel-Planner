@@ -1,4 +1,5 @@
 window.currentPlanData = null;
+window.placesMap = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
@@ -216,6 +217,34 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `}).join('');
 
+        // Khởi tạo bản đồ
+        if (window.placesMap) {
+            window.placesMap.remove();
+        }
+        window.placesMap = L.map('places-map').setView([16.047079, 108.206230], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(window.placesMap);
+
+        const bounds = [];
+        data.places.hotels.forEach(h => {
+            if(h.lat && h.lng) {
+                L.marker([h.lat, h.lng]).addTo(window.placesMap)
+                    .bindPopup(`<b>${h.name}</b><br>${h.rating}<br>${formatPriceString(h.price)}`);
+                bounds.push([h.lat, h.lng]);
+            }
+        });
+        data.places.foods.forEach(f => {
+            if(f.lat && f.lng) {
+                L.marker([f.lat, f.lng]).addTo(window.placesMap)
+                    .bindPopup(`<b>${f.name}</b><br>${f.type}<br>${formatPriceString(f.price)}`);
+                bounds.push([f.lat, f.lng]);
+            }
+        });
+        if (bounds.length > 0) {
+            window.placesMap.fitBounds(bounds, { padding: [20, 20] });
+        }
+
         // Cost Table
         let totalSum = 0;
         document.getElementById('cost-table-body').innerHTML = data.cost.map(c => {
@@ -237,23 +266,38 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('hb-destination').textContent = data.input.destination.toUpperCase();
         document.getElementById('hb-date-people').textContent = `${data.input.days} Ngày | ${data.input.adults + data.input.children} Người | Từ: ${data.input.departure}`;
         
-        document.getElementById('handbook-content').innerHTML = data.itinerary.map(day => `
+        document.getElementById('handbook-content').innerHTML = data.itinerary.map(day => {
+            let mapLink = '';
+            if (day.activities.length > 0) {
+                const dest = data.input.destination;
+                if (day.activities.length === 1) {
+                    mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(day.activities[0].title + ' ' + dest)}`;
+                } else {
+                    const origin = encodeURIComponent(day.activities[0].title + ' ' + dest);
+                    const destination = encodeURIComponent(day.activities[day.activities.length - 1].title + ' ' + dest);
+                    const waypoints = day.activities.slice(1, -1).map(a => encodeURIComponent(a.title + ' ' + dest)).join('|');
+                    mapLink = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypoints ? '&waypoints=' + waypoints : ''}`;
+                }
+            }
+            return `
             <div class="handbook-page">
                 <h3 class="hb-day-title">NGÀY ${day.day}: ${day.title.toUpperCase()}</h3>
                 ${day.activities.map(act => `
                     <div class="hb-row">
-                        <div class="hb-time">${act.time}</div>
+                        <div class="hb-time">${act.time || act.timeRange || ''}</div>
                         <div class="hb-action">
                             <strong>${act.title}</strong><br>
                             <span style="color: #666">${act.desc}</span>
                         </div>
                     </div>
                 `).join('')}
+                ${mapLink ? `<div style="margin-top: 15px; text-align: center;"><a href="${mapLink}" target="_blank" class="secondary-btn no-print" style="display: inline-block; text-decoration: none; font-size: 0.9rem; padding: 8px 15px;"><i class="fa-solid fa-map-location-dot"></i> Mở lộ trình trên Google Maps</a></div>` : ''}
                 <div style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px;">
                     <em>Chi phí dự kiến hôm nay: ~${formatMoney(data.input.budget / data.input.days)}</em>
                 </div>
             </div>
-        `).join('') + `
+            `;
+        }).join('') + `
             <div class="hb-important">
                 <h3 style="color: var(--danger); margin-bottom: 10px;">THÔNG TIN QUAN TRỌNG</h3>
                 <ul style="list-style-type: none; padding: 0;">
@@ -276,6 +320,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             btn.classList.add('active');
             document.getElementById(btn.dataset.tab).classList.add('active');
+            
+            if(btn.dataset.tab === 'tab-places' && window.placesMap) {
+                setTimeout(() => { window.placesMap.invalidateSize(); }, 100);
+            }
         });
     });
 
@@ -347,7 +395,21 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
         
         // Re-render Handbook too
-        document.getElementById('handbook-content').innerHTML = data.itinerary.map(day => `
+        const hbImportant = document.getElementById('handbook-content').innerHTML.substring(document.getElementById('handbook-content').innerHTML.lastIndexOf('<div class="hb-important">'));
+        document.getElementById('handbook-content').innerHTML = data.itinerary.map(day => {
+            let mapLink = '';
+            if (day.activities.length > 0) {
+                const dest = data.input.destination;
+                if (day.activities.length === 1) {
+                    mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(day.activities[0].title + ' ' + dest)}`;
+                } else {
+                    const origin = encodeURIComponent(day.activities[0].title + ' ' + dest);
+                    const destination = encodeURIComponent(day.activities[day.activities.length - 1].title + ' ' + dest);
+                    const waypoints = day.activities.slice(1, -1).map(a => encodeURIComponent(a.title + ' ' + dest)).join('|');
+                    mapLink = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypoints ? '&waypoints=' + waypoints : ''}`;
+                }
+            }
+            return `
             <div class="handbook-page">
                 <h3 class="hb-day-title">NGÀY ${day.day}: ${day.title.toUpperCase()}</h3>
                 ${day.activities.map(act => `
@@ -359,8 +421,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 `).join('')}
+                ${mapLink ? `<div style="margin-top: 15px; text-align: center;"><a href="${mapLink}" target="_blank" class="secondary-btn no-print" style="display: inline-block; text-decoration: none; font-size: 0.9rem; padding: 8px 15px;"><i class="fa-solid fa-map-location-dot"></i> Mở lộ trình trên Google Maps</a></div>` : ''}
             </div>
-        `).join('') + document.getElementById('handbook-content').innerHTML.substring(document.getElementById('handbook-content').innerHTML.lastIndexOf('<div class="hb-important">'));
+            `;
+        }).join('') + hbImportant;
     };
 
     const modal = document.getElementById('activity-modal');

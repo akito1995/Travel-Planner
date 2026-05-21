@@ -62,11 +62,11 @@ YÊU CẦU QUAN TRỌNG:
   ],
   "places": {
     "hotels": [
-      { "name": "Tên Khách sạn/Resort", "rating": "4 sao / Gia đình / Tiết kiệm", "price": "1.500.000đ/đêm", "desc": "Lý do chọn, view, tiện ích..." }
-    ], // Yêu cầu trả về ít nhất 4 lựa chọn lưu trú ở các phân khúc khác nhau
+      { "name": "Tên Khách sạn/Resort", "rating": "4 sao / Gia đình / Tiết kiệm", "price": "1.500.000đ/đêm", "desc": "Lý do chọn, view, tiện ích...", "lat": 21.028511, "lng": 105.804817 }
+    ], // Yêu cầu trả về ít nhất 4 lựa chọn lưu trú ở các phân khúc khác nhau. BẮT BUỘC có tọa độ lat, lng.
     "foods": [
-      { "name": "Tên Quán ăn/Nhà hàng", "type": "Ăn sáng/Trưa/Tối/Cafe", "price": "150.000đ", "desc": "Mô tả hương vị, địa chỉ..." }
-    ] // Yêu cầu trả về ít nhất 8 lựa chọn ăn uống đa dạng (đặc sản, quán nhậu, cafe, nhà hàng...)
+      { "name": "Tên Quán ăn/Nhà hàng", "type": "Ăn sáng/Trưa/Tối/Cafe", "price": "150.000đ", "desc": "Mô tả hương vị, địa chỉ...", "lat": 21.028511, "lng": 105.804817 }
+    ] // Yêu cầu trả về ít nhất 8 lựa chọn ăn uống đa dạng. BẮT BUỘC có tọa độ lat, lng.
   },
   "cost": [
     { "item": "Vé máy bay khứ hồi (Bắt buộc nếu đi xa)", "detail": "Hãng bay dự kiến", "price": 5000000 },

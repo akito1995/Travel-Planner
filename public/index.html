@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- HTML2PDF for generating PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
 
@@ -200,6 +203,7 @@
 
             <!-- Tab: Places (Bước 5) -->
             <div id="tab-places" class="tab-content">
+                <div id="places-map" style="height: 400px; width: 100%; border-radius: 12px; margin-bottom: 30px; z-index: 1;"></div>
                 <h3><i class="fa-solid fa-bed"></i> Gợi Ý Lưu Trú</h3>
                 <div class="places-grid" id="hotel-content">
                     <!-- Rendered by JS -->
