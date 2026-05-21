@@ -8,7 +8,7 @@ const app = express();
 
 // Kết nối MongoDB Atlas
 const mongoURI = "mongodb+srv://admin:Daibang%4095@cocaplanner.i0px7ya.mongodb.net/CocaPlannerDB?retryWrites=true&w=majority&appName=CocaPlanner";
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoURI)
     .then(() => console.log('✅ Connected to MongoDB Atlas'))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
