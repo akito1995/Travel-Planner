@@ -180,9 +180,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const langSelect = document.getElementById('lang-select');
     if (langSelect) {
         langSelect.addEventListener('change', (e) => {
-            updateLanguage(e.target.value);
-            // Re-init flatpickr locale if needed
-            initDatePickers(e.target.value);
+            const newLang = e.target.value;
+            const oldLang = window.currentLang;
+            
+            // Nếu đang ở màn hình kết quả, cần AI gen lại
+            if (window.currentPlanData && document.getElementById('result-page').classList.contains('active')) {
+                const confirmMsg = newLang === 'en' 
+                    ? "Changing language requires the AI to re-generate your itinerary. Do you want to proceed?" 
+                    : "Đổi ngôn ngữ yêu cầu AI phải viết lại toàn bộ lịch trình. Bạn có muốn tiếp tục không?";
+                if (confirm(confirmMsg)) {
+                    updateLanguage(newLang);
+                    initDatePickers(newLang);
+                    // Tự động submit lại form
+                    document.getElementById('travel-form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                } else {
+                    // Hoàn tác
+                    e.target.value = oldLang;
+                }
+            } else {
+                updateLanguage(newLang);
+                initDatePickers(newLang);
+            }
         });
     }
 
