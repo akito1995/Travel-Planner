@@ -430,11 +430,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('events-list').innerHTML = data.overview.events.map(e => `<li>${e}</li>`).join('');
 
         // Setup Affiliate Links
-        const destQuery = encodeURIComponent(data.input.destination);
-        const sd = data.input.startDate || '';
-        const ed = data.input.endDate || '';
-        
-        document.getElementById('link-skyscanner').href = `https://www.skyscanner.com/transport/flights-from/vn/?destination=${destQuery}&depart=${sd}&return=${ed}`;
+        const destQuery = encodeURIComponent(window.currentPlanData.input.destination);
+        const sd = window.currentPlanData.input.startDate;
+        const ed = window.currentPlanData.input.endDate;
         document.getElementById('link-tripcom').href = `https://vn.trip.com/hotels/list?city=1&cityName=${destQuery}&checkin=${sd}&checkout=${ed}`;
         document.getElementById('link-booking').href = `https://www.booking.com/searchresults.html?ss=${destQuery}&checkin=${sd}&checkout=${ed}`;
         document.getElementById('link-klook').href = `https://klook.tpx.lv/Z2t2ILK7`;
