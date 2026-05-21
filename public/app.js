@@ -573,7 +573,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const destQuery = encodeURIComponent(window.currentPlanData.input.destination);
         const sd = window.currentPlanData.input.startDate;
         const ed = window.currentPlanData.input.endDate;
-        document.getElementById('link-tripcom').href = `https://vn.trip.com/hotels/list?city=1&cityName=${destQuery}&checkin=${sd}&checkout=${ed}`;
+        // Sửa link Trip.com (Bỏ city=1 vì nó fix cứng Bắc Kinh, dùng keyword)
+        document.getElementById('link-tripcom').href = `https://vn.trip.com/hotels/list?keyword=${destQuery}&checkin=${sd}&checkout=${ed}`;
         document.getElementById('link-booking').href = `https://www.booking.com/searchresults.html?ss=${destQuery}&checkin=${sd}&checkout=${ed}`;
         document.getElementById('link-klook').href = `https://klook.tpx.lv/Z2t2ILK7`;
         
@@ -585,11 +586,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Tab: Visa
         document.getElementById('visa-content').innerHTML = `
-            <h4 style="color: var(--primary-color); margin-bottom: 10px;">Trạng thái: ${data.visa.status}</h4>
-            <div style="font-size: 0.95rem;">${data.visa.details}</div>
+            <div class="visa-status ${data.visa.status.includes('Không') ? 'visa-free' : 'visa-required'}">
+                ${data.visa.status}
+            </div>
+            <div class="mt-4">
+                ${data.visa.details}
+            </div>
         `;
 
-        // Itinerary Timeline
         window.renderItinerary();
 
         // Render Leaflet Map
@@ -646,13 +650,17 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         document.getElementById('hotel-content').innerHTML = data.places.hotels.map((h, i) => {
             const img = h.img || hotelImgs[i % hotelImgs.length];
+            const hotelSearchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(h.name + ' ' + window.currentPlanData.input.destination)}&checkin=${sd}&checkout=${ed}&aid=231123`;
             return `
             <div class="place-card">
-                <div class="place-img"><img src="${img}" alt="${h.name}"> <span class="place-badge">${h.rating}</span></div>
+                <a href="${hotelSearchUrl}" target="_blank" style="display:block; position:relative;">
+                    <div class="place-img"><img src="${img}" alt="${h.name}" style="transition: transform 0.3s;"> <span class="place-badge">${h.rating}</span></div>
+                </a>
                 <div class="place-info">
                     <h4>${h.name}</h4>
                     <p>${h.desc}</p>
-                    <div class="place-price">${formatPriceString(h.price)}</div>
+                    <div class="place-price" style="margin-bottom: 10px;">${formatPriceString(h.price)}</div>
+                    <a href="${hotelSearchUrl}" target="_blank" class="btn btn-primary" style="display:block; width:100%; background-color:#003b95; border:none; border-radius:6px; font-weight:bold; padding: 8px 0;"><i class="fa-solid fa-up-right-from-square"></i> Đặt phòng giá rẻ</a>
                 </div>
             </div>
         `}).join('');
