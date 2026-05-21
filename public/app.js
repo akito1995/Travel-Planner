@@ -99,11 +99,23 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         // Collect Data
+        const startDateStr = document.getElementById('start-date').value;
+        const endDateStr = document.getElementById('end-date').value;
+        const start = new Date(startDateStr);
+        const end = new Date(endDateStr);
+        const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+        if (days <= 0) {
+            alert('Lỗi: Ngày về phải sau hoặc cùng ngày với Ngày đi. Vui lòng chọn lại!');
+            return;
+        }
+
         const formData = {
             destination: document.getElementById('destination').value,
             departure: document.getElementById('departure').value,
-            days: parseInt(document.getElementById('days').value),
-            startDate: document.getElementById('start-date').value,
+            days: days,
+            startDate: startDateStr,
+            endDate: endDateStr,
             adults: parseInt(document.getElementById('adults').value),
             children: parseInt(document.getElementById('children').value) || 0,
             budget: parseInt(document.getElementById('budget').value.replace(/,/g, '')),
@@ -168,9 +180,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Setup Affiliate Links
         const destQuery = encodeURIComponent(data.input.destination);
-        document.getElementById('link-skyscanner').href = `https://www.skyscanner.com/transport/flights-from/vn/?destination=${destQuery}`;
-        document.getElementById('link-tripcom').href = `https://vn.trip.com/hotels/list?city=1&cityName=${destQuery}`;
-        document.getElementById('link-booking').href = `https://www.booking.com/searchresults.html?ss=${destQuery}`;
+        const sd = data.input.startDate || '';
+        const ed = data.input.endDate || '';
+        
+        document.getElementById('link-skyscanner').href = `https://www.skyscanner.com/transport/flights-from/vn/?destination=${destQuery}&depart=${sd}&return=${ed}`;
+        document.getElementById('link-tripcom').href = `https://vn.trip.com/hotels/list?city=1&cityName=${destQuery}&checkin=${sd}&checkout=${ed}`;
+        document.getElementById('link-booking').href = `https://www.booking.com/searchresults.html?ss=${destQuery}&checkin=${sd}&checkout=${ed}`;
         document.getElementById('link-klook').href = `https://klook.tpx.lv/Z2t2ILK7`;
 
         // Tab: Visa
