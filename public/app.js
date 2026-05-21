@@ -181,8 +181,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (langSelect) {
         langSelect.addEventListener('change', (e) => {
             updateLanguage(e.target.value);
+            // Re-init flatpickr locale if needed
+            initDatePickers(e.target.value);
         });
     }
+
+    // Init Date Pickers
+    function initDatePickers(lang) {
+        flatpickr("#start-date", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            minDate: "today",
+            locale: lang === 'vi' ? "vn" : "default"
+        });
+        flatpickr("#end-date", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d/m/Y",
+            minDate: "today",
+            locale: lang === 'vi' ? "vn" : "default"
+        });
+    }
+    initDatePickers(window.currentLang);
 
     // DOM Elements
     const views = {
