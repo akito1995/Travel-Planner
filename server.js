@@ -19,9 +19,55 @@ const planSchema = new mongoose.Schema({
 });
 const Plan = mongoose.model('Plan', planSchema);
 
+const fs = require('fs');
+const path = require('path');
+
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// SEO Interceptor cho tính năng Share Link
+app.get('/', async (req, res, next) => {
+    if (!req.query.trip) return next();
+
+    try {
+        const plan = await Plan.findById(req.query.trip);
+        if (!plan) return next();
+
+        const planData = plan.planData;
+        const destination = planData.input.destination || 'Điểm đến';
+        const budget = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(planData.input.budget || 0);
+        const days = planData.input.days || 3;
+        
+        let imageUrl = 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&q=80'; // Default
+        try {
+            const unsplashKey = "1fP-nn2pZ4hUUnQEUjZAcGW-DPf57G0J37qv9iIJzBg";
+            const unsplashUrl = `https://api.unsplash.com/search/photos?page=1&per_page=1&query=${encodeURIComponent(destination + " landmark")}&orientation=landscape&client_id=${unsplashKey}`;
+            const fetchRes = await fetch(unsplashUrl);
+            const imgData = await fetchRes.json();
+            if (imgData.results && imgData.results.length > 0) imageUrl = imgData.results[0].urls.regular;
+        } catch (e) {}
+
+        const title = `Lịch trình du lịch ${destination} trong ${days} ngày - Coca Planner`;
+        const description = `Kế hoạch chi tiết tự động với ngân sách ${budget}. Xem ngay lịch trình và hướng dẫn chi tiết!`;
+
+        let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf-8');
+        const metaTags = `
+            <meta property="og:title" content="${title}">
+            <meta property="og:description" content="${description}">
+            <meta property="og:image" content="${imageUrl}">
+            <meta property="og:type" content="website">
+            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:title" content="${title}">
+            <meta name="twitter:description" content="${description}">
+            <meta name="twitter:image" content="${imageUrl}">
+        `;
+        html = html.replace('<head>', '<head>' + metaTags);
+        res.send(html);
+    } catch (err) {
+        next();
+    }
+});
 app.use(express.static('public', {
     etag: false,
     maxAge: 0,

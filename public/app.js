@@ -309,6 +309,9 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.values(views).forEach(v => v.classList.remove('active'));
         views[viewName].classList.add('active');
         window.scrollTo(0, 0);
+        if (window.tripMap && viewName === 'result') {
+            setTimeout(() => window.tripMap.invalidateSize(), 300);
+        }
     };
 
     document.getElementById('start-btn').addEventListener('click', () => switchView('form'));
@@ -573,6 +576,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('link-tripcom').href = `https://vn.trip.com/hotels/list?city=1&cityName=${destQuery}&checkin=${sd}&checkout=${ed}`;
         document.getElementById('link-booking').href = `https://www.booking.com/searchresults.html?ss=${destQuery}&checkin=${sd}&checkout=${ed}`;
         document.getElementById('link-klook').href = `https://klook.tpx.lv/Z2t2ILK7`;
+        
+        // Smart Hotel Booking Widget
+        const smartBtn = document.getElementById('smart-booking-btn');
+        if (smartBtn) {
+            smartBtn.href = `https://www.booking.com/searchresults.html?ss=${destQuery}&checkin=${sd}&checkout=${ed}&aid=231123`; // Fake AID for demo
+        }
 
         // Tab: Visa
         document.getElementById('visa-content').innerHTML = `
@@ -582,6 +591,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Itinerary Timeline
         window.renderItinerary();
+
+        // Render Leaflet Map
+        const mapContainer = document.getElementById('trip-map');
+        if (mapContainer && window.L) {
+            // Clean up old map if exists
+            if (window.tripMap) {
+                window.tripMap.remove();
+            }
+            window.tripMap = L.map('trip-map').setView([0, 0], 2);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO'
+            }).addTo(window.tripMap);
+
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+            let allMarkers = [];
+
+            data.itinerary.forEach((day, dayIndex) => {
+                const color = colors[dayIndex % colors.length];
+                let dayPoints = [];
+
+                day.activities.forEach((act) => {
+                    if (act.lat && act.lng) {
+                        const pt = [act.lat, act.lng];
+                        dayPoints.push(pt);
+                        allMarkers.push(pt);
+                        
+                        // Custom Marker Icon
+                        const markerHtml = `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${day.day}</div>`;
+                        const icon = L.divIcon({ html: markerHtml, className: 'custom-leaflet-marker', iconSize: [24, 24], iconAnchor: [12, 12] });
+                        
+                        L.marker(pt, { icon: icon }).addTo(window.tripMap)
+                            .bindPopup(`<b>Ngày ${day.day}: ${act.title}</b><br>${act.desc}`);
+                    }
+                });
+
+                if (dayPoints.length > 1) {
+                    L.polyline(dayPoints, { color: color, weight: 3, opacity: 0.7, dashArray: '5, 10' }).addTo(window.tripMap);
+                }
+            });
+
+            if (allMarkers.length > 0) {
+                window.tripMap.fitBounds(L.latLngBounds(allMarkers), { padding: [30, 30] });
+            }
+        }
 
         // Places (Hotels & Food)
         const hotelImgs = [
@@ -786,6 +839,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if(btn.dataset.tab === 'tab-places' && window.placesMap) {
                 setTimeout(() => { window.placesMap.invalidateSize(); }, 100);
+            }
+            if(btn.dataset.tab === 'tab-overview' && window.tripMap) {
+                setTimeout(() => { window.tripMap.invalidateSize(); }, 100);
             }
             if(btn.dataset.tab === 'tab-itinerary' && window.itineraryMap) {
                 setTimeout(() => { window.itineraryMap.invalidateSize(); }, 100);

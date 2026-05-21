@@ -1,0 +1,16 @@
+{
+  "name": "Coca Planner",
+  "short_name": "Coca",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#003b95",
+  "description": "AI Travel Planner - Lên lịch trình du lịch thông minh trong 1 phút",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2060/2060284.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
