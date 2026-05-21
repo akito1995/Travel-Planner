@@ -39,7 +39,7 @@ app.get('/', async (req, res, next) => {
         const budget = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(planData.input.budget || 0);
         const days = planData.input.days || 3;
         
-        let imageUrl = 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&q=80'; // Default
+        let imageUrl = 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&q=80&fm=jpg'; // Default
         try {
             const unsplashKey = "1fP-nn2pZ4hUUnQEUjZAcGW-DPf57G0J37qv9iIJzBg";
             const unsplashUrl = `https://api.unsplash.com/search/photos?page=1&per_page=1&query=${encodeURIComponent(destination + " landmark")}&orientation=landscape&client_id=${unsplashKey}`;
@@ -47,6 +47,11 @@ app.get('/', async (req, res, next) => {
             const imgData = await fetchRes.json();
             if (imgData.results && imgData.results.length > 0) imageUrl = imgData.results[0].urls.regular;
         } catch (e) {}
+        
+        // Zalo bot is strict, appending a dummy .jpg can help if missing
+        if (!imageUrl.includes('.jpg')) {
+            imageUrl += '&ext=.jpg';
+        }
 
         const title = `Lịch trình du lịch ${destination} trong ${days} ngày - Coca Planner`;
         const description = `Kế hoạch chi tiết tự động với ngân sách ${budget}. Xem ngay lịch trình và hướng dẫn chi tiết!`;
@@ -56,7 +61,10 @@ app.get('/', async (req, res, next) => {
             <meta property="og:title" content="${title}">
             <meta property="og:description" content="${description}">
             <meta property="og:image" content="${imageUrl}">
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
             <meta property="og:type" content="website">
+            <meta property="og:url" content="https://travel-planner-lmtn.onrender.com/?trip=${req.query.trip}">
             <meta name="twitter:card" content="summary_large_image">
             <meta name="twitter:title" content="${title}">
             <meta name="twitter:description" content="${description}">
