@@ -23,6 +23,26 @@
     --font-heading: 'Outfit', sans-serif;
 }
 
+[data-theme="dark"] {
+    --primary-blue: #48cae4;
+    --secondary-blue: #90e0ef;
+    --light-blue: #023e8a;
+    --pale-blue: #0b1a2a;
+    --deep-ocean: #caf0f8;
+    
+    --text-main: #e9ecef;
+    --text-muted: #adb5bd;
+    
+    --white: #1b263b;
+    --glass-bg: rgba(27, 38, 59, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+body {
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
 * {
     margin: 0;
     padding: 0;

@@ -261,6 +261,29 @@ document.addEventListener('DOMContentLoaded', () => {
         result: document.getElementById('result-page')
     };
 
+    // Dark Mode Logic
+    const themeToggle = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+    }
+    
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+            }
+        });
+    }
+
     // Format budget input with commas
     const budgetInput = document.getElementById('budget');
     if (budgetInput) {
@@ -533,6 +556,36 @@ document.addEventListener('DOMContentLoaded', () => {
             overBudgetHtml = ` <span style="background-color: var(--danger, #ff4757); color: white; font-size: 0.8rem; padding: 4px 8px; border-radius: 20px; vertical-align: text-bottom; margin-left: 8px; white-space: nowrap; display: inline-block;">Vượt hạn mức</span>`;
         }
         document.getElementById('total-cost').innerHTML = formatMoney(totalSum) + overBudgetHtml;
+
+        // Render Chart.js
+        if (window.costChart instanceof Chart) {
+            window.costChart.destroy();
+        }
+        
+        const chartCtx = document.getElementById('cost-chart');
+        if (chartCtx) {
+            const labels = data.cost.map(c => c.item);
+            const values = data.cost.map(c => c.price);
+            const bgColors = ['#0077b6', '#00b4d8', '#90e0ef', '#caf0f8', '#03045e', '#e9c46a', '#e76f51', '#2a9d8f'];
+            
+            window.costChart = new Chart(chartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: bgColors.slice(0, labels.length),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
 
         // Currency logic
         const targetCurrency = data.currencyCode ? data.currencyCode.toLowerCase() : '';
