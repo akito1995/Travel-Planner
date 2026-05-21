@@ -166,6 +166,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('weather-text').textContent = data.overview.weather;
         document.getElementById('events-list').innerHTML = data.overview.events.map(e => `<li>${e}</li>`).join('');
 
+        // Setup Affiliate Links
+        const destQuery = encodeURIComponent(data.input.destination);
+        document.getElementById('link-skyscanner').href = `https://www.skyscanner.com/transport/flights-from/vn/?destination=${destQuery}`;
+        document.getElementById('link-tripcom').href = `https://vn.trip.com/hotels/list?city=1&cityName=${destQuery}`;
+        document.getElementById('link-booking').href = `https://www.booking.com/searchresults.html?ss=${destQuery}`;
+
         // Tab: Visa
         document.getElementById('visa-content').innerHTML = `
             <h4 style="color: var(--primary-color); margin-bottom: 10px;">Trạng thái: ${data.visa.status}</h4>
@@ -262,6 +268,30 @@ document.addEventListener('DOMContentLoaded', () => {
             overBudgetHtml = ` <span style="background-color: var(--danger, #ff4757); color: white; font-size: 0.8rem; padding: 4px 8px; border-radius: 20px; vertical-align: text-bottom; margin-left: 8px; white-space: nowrap; display: inline-block;">Vượt hạn mức</span>`;
         }
         document.getElementById('total-cost').innerHTML = formatMoney(totalSum) + overBudgetHtml;
+
+        // Currency logic
+        const targetCurrency = data.currencyCode ? data.currencyCode.toLowerCase() : '';
+        const currencyContainer = document.getElementById('currency-exchange');
+        if (targetCurrency && targetCurrency !== 'vnd') {
+            currencyContainer.style.display = 'block';
+            document.getElementById('live-rate').textContent = `Đang tải tỷ giá ${targetCurrency.toUpperCase()}...`;
+            fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/vnd.json')
+                .then(res => res.json())
+                .then(json => {
+                    if (json.vnd && json.vnd[targetCurrency]) {
+                        const rate = json.vnd[targetCurrency];
+                        const foreignTotal = totalSum * rate;
+                        document.getElementById('live-rate').textContent = `1 VND = ${rate.toFixed(6)} ${targetCurrency.toUpperCase()} | Tổng: ~${new Intl.NumberFormat('en-US', { style: 'currency', currency: targetCurrency.toUpperCase() }).format(foreignTotal)}`;
+                    } else {
+                        currencyContainer.style.display = 'none';
+                    }
+                })
+                .catch(() => {
+                    currencyContainer.style.display = 'none';
+                });
+        } else {
+            currencyContainer.style.display = 'none';
+        }
 
         // Handbook (Step 8)
         document.getElementById('hb-destination').textContent = data.input.destination.toUpperCase();
@@ -369,6 +399,71 @@ document.addEventListener('DOMContentLoaded', () => {
             // trigger click on active tab to reset view
             document.querySelector('.tab-btn.active').click();
         });
+    });
+
+    // Download ICS (Google/Apple Calendar)
+    document.getElementById('download-ics-btn').addEventListener('click', () => {
+        if (!window.currentPlanData) return;
+        const data = window.currentPlanData;
+        let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Coca Planner//Travel Itinerary//VI\n";
+        
+        let currentStartDate = new Date(data.input.startDate);
+        if (isNaN(currentStartDate.getTime())) {
+            currentStartDate = new Date(); // fallback
+        }
+        
+        const formatDateICS = (date) => {
+            return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        };
+
+        data.itinerary.forEach((day, dIdx) => {
+            const dayDate = new Date(currentStartDate);
+            dayDate.setDate(dayDate.getDate() + day.day - 1);
+            
+            day.activities.forEach((act, aIdx) => {
+                let startHour = 9;
+                let endHour = 10;
+                let sm = 0;
+                let em = 0;
+                
+                // Parse timeRange e.g. "09:00 - 11:00"
+                const timeMatch = act.timeRange ? act.timeRange.match(/(\d{1,2}):(\d{2})/g) : null;
+                if (timeMatch && timeMatch.length >= 1) {
+                    const [sh, sMin] = timeMatch[0].split(':').map(Number);
+                    startHour = sh;
+                    sm = sMin;
+                    endHour = startHour + 1;
+                    if (timeMatch.length >= 2) {
+                        const [ehh, emm] = timeMatch[1].split(':').map(Number);
+                        endHour = ehh;
+                        em = emm;
+                    }
+                }
+                
+                const startDate = new Date(dayDate);
+                startDate.setHours(startHour, sm, 0);
+                const endDate = new Date(dayDate);
+                endDate.setHours(endHour, em, 0);
+                
+                icsContent += "BEGIN:VEVENT\n";
+                icsContent += `DTSTART:${formatDateICS(startDate)}\n`;
+                icsContent += `DTEND:${formatDateICS(endDate)}\n`;
+                icsContent += `SUMMARY:${act.title}\n`;
+                icsContent += `DESCRIPTION:${act.desc}\n`;
+                icsContent += `LOCATION:${data.input.destination}\n`;
+                icsContent += "END:VEVENT\n";
+            });
+        });
+        
+        icsContent += "END:VCALENDAR";
+        
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.setAttribute('download', 'LichTrinh_DuLich.ics');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     });
 
     // --- Lịch Trình Editing Logic ---

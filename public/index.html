@@ -142,7 +142,8 @@
                     <h2 style="margin: 0;" class="desktop-only">Khám Phá <span id="res-destination"></span></h2>
                 </div>
                 <div class="action-buttons">
-                    <button id="download-pdf-btn" class="secondary-btn"><i class="fa-solid fa-download"></i> Tải PDF / In</button>
+                    <button id="download-ics-btn" class="secondary-btn"><i class="fa-regular fa-calendar-plus"></i> Xuất Lịch</button>
+                    <button id="download-pdf-btn" class="secondary-btn"><i class="fa-solid fa-download"></i> Tải PDF</button>
                     <button id="restart-btn" class="ghost-btn"><i class="fa-solid fa-rotate-right"></i> Làm lại</button>
                 </div>
             </div>
@@ -156,6 +157,13 @@
                 <div class="summary-item"><i class="fa-solid fa-user-group"></i> <span id="res-people"></span> người</div>
                 <div class="summary-item"><i class="fa-solid fa-wallet"></i> <span id="res-budget"></span>/người</div>
                 <div class="summary-item"><i class="fa-solid fa-bullseye"></i> <span id="res-purpose"></span></div>
+            </div>
+
+            <!-- Affiliate Links -->
+            <div class="action-banner no-print" style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+                <a href="#" id="link-skyscanner" target="_blank" class="secondary-btn" style="flex: 1; text-align: center; text-decoration: none; font-size: 0.9rem; background: #e0f2fe; color: #0284c7; border-color: #e0f2fe;"><i class="fa-solid fa-plane"></i> Vé Skyscanner</a>
+                <a href="#" id="link-tripcom" target="_blank" class="secondary-btn" style="flex: 1; text-align: center; text-decoration: none; font-size: 0.9rem; background: #eff6ff; color: #1d4ed8; border-color: #eff6ff;"><i class="fa-solid fa-suitcase"></i> Đặt Trip.com</a>
+                <a href="#" id="link-booking" target="_blank" class="secondary-btn" style="flex: 1; text-align: center; text-decoration: none; font-size: 0.9rem; background: #f0fdf4; color: #166534; border-color: #f0fdf4;"><i class="fa-solid fa-bed"></i> Đặt Booking.com</a>
             </div>
 
             <!-- Tabs Navigation -->
@@ -220,6 +228,9 @@
             <div id="tab-cost" class="tab-content">
                 <div class="card">
                     <h3><i class="fa-solid fa-file-invoice-dollar"></i> Bảng Dự Toán Chi Phí Tối Ưu</h3>
+                    <div id="currency-exchange" style="margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 8px; font-size: 0.9rem; display: none;">
+                        <i class="fa-solid fa-money-bill-transfer"></i> Tỷ giá tham khảo (Live): <strong id="live-rate"></strong>
+                    </div>
                     <div class="table-responsive">
                         <table class="cost-table">
                             <thead>

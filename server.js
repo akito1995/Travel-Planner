@@ -75,7 +75,8 @@ YÊU CẦU QUAN TRỌNG:
     { "item": "Ăn uống", "detail": "Y ngày", "price": 1000000 },
     { "item": "Di chuyển tại điểm đến", "detail": "Ưu tiên phương tiện công cộng (MRT, Tàu điện, Bus) để tiết kiệm", "price": 500000 },
     { "item": "Vé tham quan & Vui chơi", "detail": "Các điểm đến nổi bật", "price": 1000000 }
-  ]
+  ],
+  "currencyCode": "Mã tiền tệ của điểm đến (Ví dụ: JPY, THB, USD, SGD, VND... Bắt buộc phải là mã 3 chữ cái chuẩn ISO)"
 }
 Chú ý: 
 1. Các mức giá (price) trong mảng 'cost' BẮT BUỘC phải là SỐ NGUYÊN (number), tính trên 1 người. VD: 2000000. Không dùng chuỗi string.
