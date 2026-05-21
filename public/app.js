@@ -1,5 +1,6 @@
 window.currentPlanData = null;
 window.placesMap = null;
+window.itineraryMap = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
@@ -324,6 +325,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if(btn.dataset.tab === 'tab-places' && window.placesMap) {
                 setTimeout(() => { window.placesMap.invalidateSize(); }, 100);
             }
+            if(btn.dataset.tab === 'tab-itinerary' && window.itineraryMap) {
+                setTimeout(() => { window.itineraryMap.invalidateSize(); }, 100);
+            }
         });
     });
 
@@ -393,6 +397,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="add-act-btn no-print" data-didx="${dIdx}"><i class="fa-solid fa-plus"></i> Thêm hoạt động</button>
             </div>
         `).join('');
+
+        // Cập nhật Bản đồ lộ trình
+        if (window.itineraryMap) {
+            window.itineraryMap.remove();
+        }
+        window.itineraryMap = L.map('itinerary-map').setView([16.047079, 108.206230], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(window.itineraryMap);
+
+        const itBounds = [];
+        const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
+        
+        data.itinerary.forEach((day, dIdx) => {
+            const dayColor = colors[dIdx % colors.length];
+            const latlngs = [];
+            
+            day.activities.forEach((act, aIdx) => {
+                if (act.lat && act.lng) {
+                    latlngs.push([act.lat, act.lng]);
+                    itBounds.push([act.lat, act.lng]);
+                    
+                    const icon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background-color: ${dayColor}; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">${aIdx + 1}</div>`,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    });
+                    
+                    L.marker([act.lat, act.lng], { icon: icon }).addTo(window.itineraryMap)
+                        .bindPopup(`<b>Ngày ${day.day}: ${act.title}</b><br>${act.timeRange}<br>${act.desc}`);
+                }
+            });
+            
+            if (latlngs.length > 1) {
+                L.polyline(latlngs, { color: dayColor, weight: 3, dashArray: '5, 10' }).addTo(window.itineraryMap);
+            }
+        });
+        
+        if (itBounds.length > 0) {
+            window.itineraryMap.fitBounds(itBounds, { padding: [30, 30] });
+        }
         
         // Re-render Handbook too
         const hbImportant = document.getElementById('handbook-content').innerHTML.substring(document.getElementById('handbook-content').innerHTML.lastIndexOf('<div class="hb-important">'));

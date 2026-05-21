@@ -56,7 +56,7 @@ YÊU CẦU QUAN TRỌNG:
       "day": 1,
       "title": "Tên chủ đề của ngày",
       "activities": [
-        { "session": "Sáng/Trưa/Chiều/Tối", "timeRange": "09:00 - 11:00", "title": "Tên hoạt động", "desc": "Mô tả chi tiết..." }
+        { "session": "Sáng/Trưa/Chiều/Tối", "timeRange": "09:00 - 11:00", "title": "Tên hoạt động", "desc": "Mô tả chi tiết...", "lat": 21.028511, "lng": 105.804817 }
       ]
     }
   ],
@@ -115,9 +115,9 @@ app.post('/api/research-activity', async (req, res) => {
 Điểm đến: ${destination}.
 Thời gian dự kiến: ${session} (${timeRange}).
 YÊU CẦU QUAN TRỌNG:
-1. TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON CÓ TRƯỜNG "desc".
+1. TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON CÓ TRƯỜNG "desc", "lat" và "lng" (tọa độ của địa điểm).
 2. KHÔNG DÙNG MARKDOWN BLOCK (\`\`\`json).
-VD: { "desc": "Thưởng thức ly cà phê ấm nóng và ngắm nhìn..." }`;
+VD: { "desc": "Thưởng thức ly cà phê ấm nóng và ngắm nhìn...", "lat": 21.028511, "lng": 105.804817 }`;
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
