@@ -12,6 +12,31 @@ mongoose.connect(mongoURI)
     .then(() => console.log('✅ Connected to MongoDB Atlas'))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+async function generateWithRetry(prompt) {
+    let response;
+    let retries = 3;
+    while (retries > 0) {
+        try {
+            response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: prompt,
+                config: {
+                    tools: [{ googleSearch: {} }]
+                }
+            });
+            break;
+        } catch (err) {
+            console.error("Gemini API Error (retries left: " + (retries-1) + "):", err.message);
+            retries--;
+            if (retries === 0) throw err;
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+    }
+    return response;
+}
+
 // Schema cho Lịch trình
 const planSchema = new mongoose.Schema({
     planData: { type: Object, required: true },
@@ -89,10 +114,6 @@ app.use(express.static('public', {
     }
 }));
 
-// Khởi tạo Gemini AI Client
-// Sẽ tự động lấy API key từ file .env (GEMINI_API_KEY)
-const ai = new GoogleGenAI({});
-
 app.post('/api/generate-plan', async (req, res) => {
     try {
         const data = req.body;
@@ -157,26 +178,7 @@ Chú ý:
 3. Khi di chuyển tại điểm đến, luôn ưu tiên các phương tiện công cộng giá rẻ như MRT, tàu điện ngầm, hoặc xe buýt thay vì taxi hay xe đưa đón riêng để tiết kiệm chi phí.
 4. TÍCH HỢP TÌM KIẾM: Hãy tìm kiếm thông tin trên Internet để lấy thông tin giá phòng khách sạn và giá nhà hàng/quán ăn thực tế, sát với thời điểm hiện tại nhất (không tự bịa giá).`;
 
-        // Retry logic cho Gemini API (xử lý lỗi 503)
-        let response;
-        let retries = 3;
-        while (retries > 0) {
-            try {
-                response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents: prompt,
-                    config: {
-                        tools: [{ googleSearch: {} }]
-                    }
-                });
-                break; // Thành công thì thoát loop
-            } catch (err) {
-                console.error("Gemini API Error (retries left: " + (retries-1) + "):", err.message);
-                retries--;
-                if (retries === 0) throw err;
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Chờ 2s rồi thử lại
-            }
-        }
+        const response = await generateWithRetry(prompt);
 
         // Xử lý dữ liệu trả về để parse JSON
         let text = response.text || '';
@@ -224,13 +226,7 @@ YÊU CẦU QUAN TRỌNG:
 2. KHÔNG DÙNG MARKDOWN BLOCK (\`\`\`json).
 VD: { "desc": "Thưởng thức ly cà phê ấm nóng và ngắm nhìn...", "lat": 21.028511, "lng": 105.804817 }`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                tools: [{ googleSearch: {} }]
-            }
-        });
+        const response = await generateWithRetry(prompt);
 
         let text = response.text || '';
         text = text.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -261,13 +257,7 @@ YÊU CẦU QUAN TRỌNG:
     "lng": 12.3456
 }`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                tools: [{ googleSearch: {} }]
-            }
-        });
+        const response = await generateWithRetry(prompt);
 
         let text = response.text || '';
         text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
@@ -282,7 +272,7 @@ YÊU CẦU QUAN TRỌNG:
         res.json(result);
     } catch (err) {
         console.error("Lỗi regenerate activity:", err);
-        res.status(500).json({ error: "Lỗi tạo hoạt động thay thế" });
+        res.status(500).json({ error: "Lỗi tạo hoạt động thay thế: " + err.message });
     }
 });
 
