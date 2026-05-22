@@ -650,7 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         document.getElementById('hotel-content').innerHTML = data.places.hotels.map((h, i) => {
             const img = h.img || hotelImgs[i % hotelImgs.length];
-            const hotelSearchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(h.name + ' ' + window.currentPlanData.input.destination)}&checkin=${sd}&checkout=${ed}&aid=231123`;
+            const hotelSearchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(h.name + ' ' + window.currentPlanData.input.destination)}&checkin=${sd}&checkout=${ed}`;
             return `
             <div class="place-card">
                 <a href="${hotelSearchUrl}" target="_blank" style="display:block; position:relative;">
