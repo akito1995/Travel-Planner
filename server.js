@@ -130,6 +130,10 @@ Thông tin chuyến đi:
 - Ngày đi: ${data.startDate || 'Không rõ'}
 - Độ dài chuyến đi: ${data.days || 3} ngày
         
+CÁC YÊU CẦU NÂNG CAO:
+1. ĐA ĐIỂM (MULTI-CITY): Nếu Điểm đến chứa nhiều thành phố/quốc gia, hãy tự động phân bổ số ngày lưu trú hợp lý cho từng nơi, và thêm các hoạt động "Di chuyển giữa các thành phố" (Tàu Shinkansen, Xe buýt, Chuyến bay nội địa) vào lịch trình.
+2. THỜI TIẾT (WEATHER-AWARE): Bắt buộc dùng Google Search tra cứu khí hậu/thời tiết tại điểm đến vào tháng/ngày đi là ${data.startDate || 'dự kiến'}. Phải chọn các hoạt động và món ăn phù hợp với thời tiết đó (Ví dụ: mùa Đông có tuyết thì ưu tiên ăn lẩu ấm, tắm khoáng nóng; mùa Hè thì đi biển).
+
 YÊU CẦU QUAN TRỌNG: 
 1. TRẢ VỀ DUY NHẤT 1 ĐỐI TƯỢNG JSON THEO FORMAT BÊN DƯỚI.
 2. KHÔNG BAO GỒM BẤT KỲ VĂN BẢN NÀO KHÁC NGOÀI JSON. KHÔNG DÙNG MARKDOWN BLOCK (\`\`\`json).

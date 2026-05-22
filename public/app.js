@@ -860,44 +860,88 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Download PDF
+    // Download PDF (Brochure Style)
     document.getElementById('download-pdf-btn').addEventListener('click', () => {
-        // Switch to handbook tab before printing for best view, or print entire container
-        const element = document.getElementById('pdf-content');
-        
-        // Hide tabs buttons for printing
-        const tabs = document.querySelector('.tabs');
-        tabs.style.display = 'none';
+        const data = window.currentPlanData;
+        if (!data) return;
 
-        // Ensure all contents are visible for PDF, temporarily override tab-content logic
-        const allTabs = document.querySelectorAll('.tab-content');
-        allTabs.forEach(t => {
-            t.style.display = 'block';
-            t.style.pageBreakBefore = 'always';
-            t.style.animation = 'none'; // Tắt animation fadeIn để không bị mờ
-            t.style.opacity = '1';
+        const template = document.getElementById('brochure-template');
+        template.style.display = 'block';
+        
+        let dest = data.input.destination;
+        let coverImg = window.currentImageUrl || 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&q=80&fm=jpg';
+
+        // 1. Build HTML
+        let html = `
+            <div class="brochure-cover">
+                <img src="logo.png" class="logo" crossorigin="anonymous">
+                <h1>${dest.toUpperCase()}</h1>
+                <h2>Chuyến đi ${data.input.days} ngày</h2>
+                <p>${data.overview.description}</p>
+            </div>
+        `;
+
+        data.itinerary.forEach((day, dIdx) => {
+            html += `
+                <div class="brochure-page">
+                    <h3 class="brochure-page-title">Ngày ${day.day}: ${day.title}</h3>
+            `;
+            day.activities.forEach((act, aIdx) => {
+                let mapUrl = act.lat && act.lng ? `https://www.google.com/maps/search/?api=1&query=${act.lat},${act.lng}` : '';
+                html += `
+                    <div class="b-activity">
+                        <div class="b-time">${act.timeRange}</div>
+                        <div class="b-content">
+                            <h4>${act.title}</h4>
+                            <p>${act.desc}</p>
+                        </div>
+                        <div class="b-qr">
+                            ${mapUrl ? `<div id="qr-${dIdx}-${aIdx}" class="b-qr-box" data-url="${mapUrl}"></div><p>Bản đồ</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
         });
 
+        template.innerHTML = html;
+
+        // 2. Generate QR Codes
+        data.itinerary.forEach((day, dIdx) => {
+            day.activities.forEach((act, aIdx) => {
+                let qrBox = document.getElementById(`qr-${dIdx}-${aIdx}`);
+                if (qrBox) {
+                    new QRCode(qrBox, {
+                        text: qrBox.getAttribute('data-url'),
+                        width: 80,
+                        height: 80
+                    });
+                }
+            });
+        });
+
+        // 3. Print
         const opt = {
-            margin:       10,
-            filename:     'Ke_Hoach_Du_Lich.pdf',
+            margin:       0,
+            filename:     'Ke_Hoach_Du_Lich_Coca_Planner.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().set(opt).from(element).save().then(() => {
-            // Restore styles
-            tabs.style.display = 'flex';
-            allTabs.forEach(t => {
-                t.style.display = '';
-                t.style.pageBreakBefore = '';
-                t.style.animation = '';
-                t.style.opacity = '';
+        // Let QR codes render first (give it 500ms)
+        const btn = document.getElementById('download-pdf-btn');
+        const oldText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tạo PDF...';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            html2pdf().set(opt).from(template).save().then(() => {
+                template.style.display = 'none';
+                btn.innerHTML = oldText;
+                btn.disabled = false;
             });
-            // trigger click on active tab to reset view
-            document.querySelector('.tab-btn.active').click();
-        });
+        }, 500);
     });
 
     // Download ICS (Google/Apple Calendar)
