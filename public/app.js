@@ -1096,6 +1096,46 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('modal-act-index').value = "";
             document.getElementById('activity-form').reset();
             modal.classList.add('active');
+        } else if (target.classList.contains('swap-btn')) {
+            const act = window.currentPlanData.itinerary[dIdx].activities[aIdx];
+            const oldIcon = target.innerHTML;
+            target.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            target.disabled = true;
+            
+            fetch('/api/regenerate-activity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    destination: window.currentPlanData.input.destination, 
+                    session: act.session, 
+                    timeRange: act.timeRange, 
+                    oldTitle: act.title,
+                    language: window.currentLang 
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.title && !data.error) {
+                    window.currentPlanData.itinerary[dIdx].activities[aIdx] = {
+                        session: act.session,
+                        timeRange: act.timeRange,
+                        title: data.title,
+                        desc: data.desc,
+                        lat: data.lat,
+                        lng: data.lng
+                    };
+                    window.renderItinerary();
+                } else {
+                    alert('Lỗi AI: ' + (data.error || 'Dữ liệu trả về không hợp lệ'));
+                    target.innerHTML = oldIcon;
+                    target.disabled = false;
+                }
+            })
+            .catch(err => {
+                alert('Lỗi kết nối: ' + err.message);
+                target.innerHTML = oldIcon;
+                target.disabled = false;
+            });
         }
     });
 

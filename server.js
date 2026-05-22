@@ -227,6 +227,49 @@ VD: { "desc": "Thưởng thức ly cà phê ấm nóng và ngắm nhìn...", "la
     }
 });
 
+app.post('/api/regenerate-activity', async (req, res) => {
+    try {
+        const { destination, session, timeRange, oldTitle, language } = req.body;
+        const langStr = language === 'en' ? 'ENGLISH' : 'VIETNAMESE';
+        
+        const prompt = `Bạn là chuyên gia du lịch. Khách hàng muốn thay đổi hoạt động "${oldTitle}" (thời gian: ${timeRange}, buổi: ${session}) tại ${destination}.
+Hãy gợi ý MỘT hoạt động/địa điểm thay thế khác hoàn toàn so với hoạt động cũ, nhưng vẫn phù hợp với khung giờ đó.
+YÊU CẦU QUAN TRỌNG:
+1. Trả về bằng ngôn ngữ: ${langStr}
+2. Trả về DUY NHẤT 1 ĐỐI TƯỢNG JSON (Không có văn bản nào khác).
+3. KHÔNG DÙNG MARKDOWN BLOCK (\`\`\`json).
+{
+    "title": "Tên hoạt động/địa điểm mới",
+    "desc": "Mô tả hấp dẫn về hoạt động mới...",
+    "lat": 12.3456,
+    "lng": 12.3456
+}`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                tools: [{ googleSearch: {} }]
+            }
+        });
+
+        let text = response.text || '';
+        text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const firstBrace = text.indexOf('{');
+        const lastBrace = text.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1) {
+            text = text.substring(firstBrace, lastBrace + 1);
+        }
+        text = text.replace(/,\s*([\]}])/g, '$1');
+        
+        const result = JSON.parse(text);
+        res.json(result);
+    } catch (err) {
+        console.error("Lỗi regenerate activity:", err);
+        res.status(500).json({ error: "Lỗi tạo hoạt động thay thế" });
+    }
+});
+
 // Endpoint dùng để dịch nguyên xi một bản kế hoạch đang có sang ngôn ngữ mới
 app.post('/api/translate-plan', async (req, res) => {
     try {
