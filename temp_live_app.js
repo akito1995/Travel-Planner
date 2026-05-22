@@ -573,8 +573,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const destQuery = encodeURIComponent(window.currentPlanData.input.destination);
         const sd = window.currentPlanData.input.startDate;
         const ed = window.currentPlanData.input.endDate;
-        // Trip.com: Chuyển hướng sang tìm kiếm Vé máy bay thay vì khách sạn
-        document.getElementById('link-tripcom').href = `https://vn.trip.com/flights/`;
+        // Sửa link Trip.com (Bỏ city=1 vì nó fix cứng Bắc Kinh, dùng keyword)
+        document.getElementById('link-tripcom').href = `https://vn.trip.com/hotels/list?keyword=${destQuery}&checkin=${sd}&checkout=${ed}`;
         document.getElementById('link-booking').href = `https://www.booking.com/searchresults.html?ss=${destQuery}&checkin=${sd}&checkout=${ed}`;
         document.getElementById('link-klook').href = `https://klook.tpx.lv/Z2t2ILK7`;
         
