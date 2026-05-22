@@ -46,6 +46,15 @@ const Plan = mongoose.model('Plan', planSchema);
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+
+// Schema cho AI Cache (Lưu kết quả tìm kiếm giống nhau)
+const aiCacheSchema = new mongoose.Schema({
+    cacheKey: { type: String, required: true, unique: true },
+    planData: { type: Object, required: true },
+    createdAt: { type: Date, default: Date.now, expires: '7d' } // Tự động xóa sau 7 ngày
+});
+const AiCache = mongoose.model('AiCache', aiCacheSchema);
 
 // Middleware
 app.use(cors());
@@ -118,6 +127,18 @@ app.post('/api/generate-plan', async (req, res) => {
     try {
         const data = req.body;
         
+        // --- 1. Tạo Hash Key từ thông số đầu vào ---
+        const rawString = `${data.language}_${data.destination}_${data.departure}_${data.startDate}_${data.endDate}_${data.days}_${data.adults}_${data.children}_${data.budget}_${data.purpose}_${data.preferences}`;
+        const cacheKey = crypto.createHash('sha256').update(rawString).digest('hex');
+
+        // --- 2. Kiểm tra Cache trong Database ---
+        const existingCache = await AiCache.findOne({ cacheKey: cacheKey });
+        if (existingCache) {
+            console.log("⚡ [CACHE HIT] Tìm thấy kết quả trong DB, không cần gọi AI!");
+            return res.json(existingCache.planData);
+        }
+        
+        console.log("🐌 [CACHE MISS] Đang gọi Google Gemini AI...");
         // Tạo Prompt chuyên gia
         const langStr = data.language === 'en' ? 'ENGLISH (All content MUST be in English)' : 'VIETNAMESE (Tất cả kết quả phải bằng Tiếng Việt)';
         const prompt = `Bạn là một chuyên gia thiết kế tour du lịch cao cấp.
@@ -207,8 +228,18 @@ Chú ý:
             return res.status(500).json({ error: "Lỗi định dạng dữ liệu từ AI. Vui lòng thử lại!" });
         }
 
-        res.json(planData);
+        // --- 3. Lưu vào Cache để dùng lại lần sau ---
+        try {
+            await AiCache.create({
+                cacheKey: cacheKey,
+                planData: planData
+            });
+            console.log("💾 [CACHE SAVE] Đã lưu kết quả mới vào kho lưu trữ tạm thời.");
+        } catch (cacheErr) {
+            console.error("Lỗi khi lưu Cache (bỏ qua):", cacheErr.message);
+        }
 
+        res.json(planData);
     } catch (error) {
         console.error("Lỗi khi tạo lịch trình AI:", error);
         if (error.message && error.message.includes("429")) {
