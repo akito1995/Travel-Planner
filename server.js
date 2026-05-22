@@ -15,26 +15,37 @@ mongoose.connect(mongoURI)
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 async function generateWithRetry(prompt) {
-    let response;
-    let retries = 3;
-    while (retries > 0) {
-        try {
-            response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: prompt,
-                config: {
-                    tools: [{ googleSearch: {} }]
+    const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-exp'];
+    
+    for (let modelName of modelsToTry) {
+        let retries = 2; // Thử 2 lần cho mỗi model
+        while (retries > 0) {
+            try {
+                console.log(`Đang thử gọi AI bằng model: ${modelName}...`);
+                const response = await ai.models.generateContent({
+                    model: modelName,
+                    contents: prompt,
+                    config: {
+                        tools: [{ googleSearch: {} }]
+                    }
+                });
+                return response;
+            } catch (err) {
+                console.error(`Lỗi API với ${modelName} (còn ${retries-1} lần thử):`, err.message);
+                if (err.message && err.message.includes("429")) {
+                    // Nếu lỗi 429 Limit Quota, đổi sang model khác ngay lập tức, không chờ retry
+                    console.log(`Bị giới hạn Quota ở ${modelName}, chuyển sang model dự phòng...`);
+                    break; 
                 }
-            });
-            break;
-        } catch (err) {
-            console.error("Gemini API Error (retries left: " + (retries-1) + "):", err.message);
-            retries--;
-            if (retries === 0) throw err;
-            await new Promise(resolve => setTimeout(resolve, 2000));
+                retries--;
+                if (retries === 0 && modelName === modelsToTry[modelsToTry.length - 1]) {
+                    throw err; // Hết cách
+                }
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
         }
     }
-    return response;
+    throw new Error("Tất cả các model AI đều bị quá tải hoặc hết hạn mức.");
 }
 
 // Schema cho Lịch trình
