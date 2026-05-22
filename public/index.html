@@ -17,6 +17,8 @@
     <!-- Leaflet Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- SortableJS cho kéo thả -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
     <!-- Affiliate Tracking Script removed as ownership is confirmed -->
 
@@ -78,11 +80,18 @@
                 </div>
                 
                 <form id="travel-form">
-                    <!-- Q1: Điểm đến -->
+                    <!-- Q1: Điểm đến (Drag & Drop Multi-City) -->
                     <div class="form-group active" data-step="1">
-                        <label for="destination"><i class="fa-solid fa-location-dot"></i> <span data-i18n="qDestination">Bạn muốn đi đâu?</span></label>
-                        <input type="text" id="destination" data-i18n-placeholder="pDestination" placeholder="VD: Tokyo, Kyoto, Osaka" required>
-                        <small class="hint" style="color:var(--primary-blue); font-weight:500;">Mẹo: Bạn có thể nhập nhiều thành phố, AI sẽ tự động phân bổ lịch trình đa điểm!</small>
+                        <label><i class="fa-solid fa-location-dot"></i> <span data-i18n="qDestination">Lộ trình chuyến đi của bạn?</span></label>
+                        <div id="destination-list" class="sortable-list">
+                            <div class="dest-item">
+                                <i class="fa-solid fa-grip-vertical drag-handle" title="Kéo để di chuyển"></i>
+                                <input type="text" class="dest-input" placeholder="VD: Tokyo" required>
+                                <button type="button" class="del-dest-btn" style="display:none;" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <button type="button" id="add-dest-btn" class="secondary-btn" style="margin-top:10px; width:100%;"><i class="fa-solid fa-plus"></i> Thêm điểm đến tiếp theo</button>
+                        <small class="hint" style="color:var(--primary-blue); font-weight:500; display:block; margin-top:15px;">Mẹo: Kéo thả (⋮⋮) để sắp xếp lại thứ tự hành trình. AI sẽ lên lịch trình theo đúng thứ tự từ trên xuống dưới!</small>
                     </div>
 
                     <!-- Q2: Điểm khởi hành (Updated requirement) -->

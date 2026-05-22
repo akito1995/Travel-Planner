@@ -131,7 +131,7 @@ Thông tin chuyến đi:
 - Độ dài chuyến đi: ${data.days || 3} ngày
         
 CÁC YÊU CẦU NÂNG CAO:
-1. ĐA ĐIỂM (MULTI-CITY): Nếu Điểm đến chứa nhiều thành phố/quốc gia, hãy tự động phân bổ số ngày lưu trú hợp lý cho từng nơi, và thêm các hoạt động "Di chuyển giữa các thành phố" (Tàu Shinkansen, Xe buýt, Chuyến bay nội địa) vào lịch trình.
+1. ĐA ĐIỂM (MULTI-CITY): Điểm đến sẽ có dạng "A -> B -> C". KHÁCH HÀNG SẼ ĐI THEO ĐÚNG THỨ TỰ NÀY. Bắt buộc sắp xếp lịch trình và phân bổ số ngày lưu trú bám sát tuyệt đối theo trình tự địa lý này. Hãy thêm các hoạt động "Di chuyển giữa các thành phố" (Tàu Shinkansen, Xe buýt, Máy bay) vào đúng những ngày chuyển giao giữa 2 điểm đến.
 2. THỜI TIẾT (WEATHER-AWARE): Bắt buộc dùng Google Search tra cứu khí hậu/thời tiết tại điểm đến vào tháng/ngày đi là ${data.startDate || 'dự kiến'}. Phải chọn các hoạt động và món ăn phù hợp với thời tiết đó (Ví dụ: mùa Đông có tuyết thì ưu tiên ăn lẩu ấm, tắm khoáng nóng; mùa Hè thì đi biển).
 
 YÊU CẦU QUAN TRỌNG: 

@@ -951,3 +951,12 @@ button {
 .b-qr { width: 80px; text-align: center; }
 .b-qr-box { width: 80px; height: 80px; }
 .b-qr p { font-size: 10px; color: #999; margin-top: 5px; }
+
+/* Dest Drag Drop */
+.dest-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 5px; background: #fff; border: 1px solid #ddd; border-radius: 8px; }
+.drag-handle { cursor: grab; color: #999; padding: 10px; }
+.dest-item input { flex: 1; border: none; outline: none; background: transparent; padding: 10px; margin: 0; }
+.del-dest-btn { background: #ff4757; color: white; border: none; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; }
+.del-dest-btn:hover { background: #ff6b81; }
+.sortable-ghost { opacity: 0.4; background: #f0f8ff; }
+.sortable-drag { cursor: grabbing !important; }

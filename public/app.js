@@ -439,6 +439,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Multi-City Drag & Drop Logic ---
+    const destList = document.getElementById('destination-list');
+    const addDestBtn = document.getElementById('add-dest-btn');
+    
+    if (destList && typeof Sortable !== 'undefined') {
+        new Sortable(destList, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
+            dragClass: 'sortable-drag'
+        });
+
+        const updateDelBtns = () => {
+            const items = destList.querySelectorAll('.dest-item');
+            items.forEach(item => {
+                const delBtn = item.querySelector('.del-dest-btn');
+                delBtn.style.display = items.length > 1 ? 'block' : 'none';
+            });
+        };
+
+        addDestBtn.addEventListener('click', () => {
+            const newItem = document.createElement('div');
+            newItem.className = 'dest-item';
+            newItem.innerHTML = `
+                <i class="fa-solid fa-grip-vertical drag-handle" title="Kéo để di chuyển"></i>
+                <input type="text" class="dest-input" placeholder="VD: Osaka" required>
+                <button type="button" class="del-dest-btn" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+            `;
+            destList.appendChild(newItem);
+            updateDelBtns();
+        });
+
+        destList.addEventListener('click', (e) => {
+            const delBtn = e.target.closest('.del-dest-btn');
+            if (delBtn) {
+                const item = delBtn.closest('.dest-item');
+                destList.removeChild(item);
+                updateDelBtns();
+            }
+        });
+        
+        updateDelBtns();
+    }
+
     // Form Submit & Generate Plan
     document.getElementById('travel-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -455,9 +499,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Collect multi-city destinations
+        const destInputs = document.querySelectorAll('.dest-input');
+        let destinationString = "";
+        if (destInputs.length > 0) {
+            destinationString = Array.from(destInputs).map(inp => inp.value.trim()).filter(val => val !== '').join(' -> ');
+        } else {
+            destinationString = document.getElementById('destination')?.value || '';
+        }
+
         const formData = {
             language: window.currentLang,
-            destination: document.getElementById('destination').value,
+            destination: destinationString,
             departure: document.getElementById('departure').value,
             days: days,
             startDate: startDateStr,
