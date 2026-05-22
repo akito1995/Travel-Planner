@@ -211,7 +211,11 @@ Chú ý:
 
     } catch (error) {
         console.error("Lỗi khi tạo lịch trình AI:", error);
-        res.status(500).json({ error: 'Đã xảy ra lỗi khi kết nối với AI. Vui lòng thử lại. Lỗi: ' + error.message });
+        if (error.message && error.message.includes("429")) {
+            res.status(500).json({ error: 'Hệ thống AI đang quá tải do có quá nhiều người sử dụng cùng lúc (hoặc bạn đã dùng hết hạn mức miễn phí). Vui lòng đợi khoảng 1 phút và bấm "Lên Kế Hoạch" lại nhé!' });
+        } else {
+            res.status(500).json({ error: 'Đã xảy ra lỗi khi kết nối với AI. Vui lòng thử lại. Lỗi: ' + error.message });
+        }
     }
 });
 
