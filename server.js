@@ -71,6 +71,9 @@ app.get('/', async (req, res, next) => {
             <meta name="twitter:image" content="${imageUrl}">
         `;
         html = html.replace('<head>', '<head>' + metaTags);
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         res.send(html);
     } catch (err) {
         next();

@@ -931,15 +931,21 @@ button {
     flex: 1;
     text-align: center;
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     white-space: nowrap;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: 600;
+    padding: 15px 10px;
+    border-radius: 12px;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.action-banner a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
 }
 #link-tripcom { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
 #link-booking { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
