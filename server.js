@@ -15,25 +15,31 @@ mongoose.connect(mongoURI)
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 async function generateWithRetry(prompt) {
-    const modelsToTry = ['gemini-1.5-flash', 'gemini-pro'];
+    const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash'];
     
     for (let modelName of modelsToTry) {
         let retries = 2; // Thử 2 lần cho mỗi model
         while (retries > 0) {
             try {
                 console.log(`Đang thử gọi AI bằng model: ${modelName}...`);
-                const response = await ai.models.generateContent({
+                
+                const requestParams = {
                     model: modelName,
                     contents: prompt,
-                    config: {
+                };
+
+                // Chỉ bật tính năng Tìm kiếm Google cho model 2.5-flash vì các model cũ không hỗ trợ
+                if (modelName === 'gemini-2.5-flash') {
+                    requestParams.config = {
                         tools: [{ googleSearch: {} }]
-                    }
-                });
+                    };
+                }
+
+                const response = await ai.models.generateContent(requestParams);
                 return response;
             } catch (err) {
                 console.error(`Lỗi API với ${modelName} (còn ${retries-1} lần thử):`, err.message);
                 if (err.message && err.message.includes("429")) {
-                    // Nếu lỗi 429 Limit Quota, đổi sang model khác ngay lập tức, không chờ retry
                     console.log(`Bị giới hạn Quota ở ${modelName}, chuyển sang model dự phòng...`);
                     break; 
                 }
