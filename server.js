@@ -205,7 +205,7 @@ Chú ý:
 
     } catch (error) {
         console.error("Lỗi khi tạo lịch trình AI:", error);
-        res.status(500).json({ error: 'Đã xảy ra lỗi khi kết nối với AI. Vui lòng thử lại.' });
+        res.status(500).json({ error: 'Đã xảy ra lỗi khi kết nối với AI. Vui lòng thử lại. Lỗi: ' + error.message });
     }
 });
 

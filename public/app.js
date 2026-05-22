@@ -478,7 +478,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
-            if (!response.ok) throw new Error('API Error');
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error || 'Lỗi kết nối API');
+            }
             const planData = await response.json();
             
             // Đảm bảo dữ liệu form đầu vào được giữ lại để render
