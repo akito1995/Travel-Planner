@@ -154,13 +154,26 @@ Chú ý:
 3. Khi di chuyển tại điểm đến, luôn ưu tiên các phương tiện công cộng giá rẻ như MRT, tàu điện ngầm, hoặc xe buýt thay vì taxi hay xe đưa đón riêng để tiết kiệm chi phí.
 4. TÍCH HỢP TÌM KIẾM: Hãy tìm kiếm thông tin trên Internet để lấy thông tin giá phòng khách sạn và giá nhà hàng/quán ăn thực tế, sát với thời điểm hiện tại nhất (không tự bịa giá).`;
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                tools: [{ googleSearch: {} }]
+        // Retry logic cho Gemini API (xử lý lỗi 503)
+        let response;
+        let retries = 3;
+        while (retries > 0) {
+            try {
+                response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: prompt,
+                    config: {
+                        tools: [{ googleSearch: {} }]
+                    }
+                });
+                break; // Thành công thì thoát loop
+            } catch (err) {
+                console.error("Gemini API Error (retries left: " + (retries-1) + "):", err.message);
+                retries--;
+                if (retries === 0) throw err;
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Chờ 2s rồi thử lại
             }
-        });
+        }
 
         // Xử lý dữ liệu trả về để parse JSON
         let text = response.text || '';
