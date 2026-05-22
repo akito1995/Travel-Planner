@@ -660,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h4>${h.name}</h4>
                     <p>${h.desc}</p>
                     <div class="place-price" style="margin-bottom: 10px;">${formatPriceString(h.price)}</div>
-                    <a href="${hotelSearchUrl}" target="_blank" class="btn btn-primary" style="display:block; width:100%; background-color:#003b95; border:none; border-radius:6px; font-weight:bold; padding: 8px 0;"><i class="fa-solid fa-up-right-from-square"></i> Đặt phòng giá rẻ</a>
+                    <a href="${hotelSearchUrl}" target="_blank" class="btn btn-primary" style="display:block; width:100%; background-color:#003b95; border:none; border-radius:6px; font-weight:bold; padding: 8px 0; color: white !important; text-align: center;"><i class="fa-solid fa-up-right-from-square"></i> Đặt phòng giá rẻ</a>
                 </div>
             </div>
         `}).join('');
@@ -973,6 +973,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="time-slot">
                         <div class="edit-controls no-print" style="z-index: 100;">
                             <button class="act-btn edit-btn" data-didx="${dIdx}" data-aidx="${aIdx}" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                            <button class="act-btn swap-btn" data-didx="${dIdx}" data-aidx="${aIdx}" title="Đổi địa điểm bằng AI"><i class="fa-solid fa-rotate"></i></button>
                             <button class="act-btn delete-btn" data-didx="${dIdx}" data-aidx="${aIdx}" title="Xóa"><i class="fa-solid fa-trash"></i></button>
                         </div>
                         <div class="time-label">
@@ -982,6 +983,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="time-content">
                             <h5>${act.title}</h5>
                             <p>${act.desc}</p>
+                            ${act.lat && act.lng ? `<a href="https://www.google.com/maps?layer=c&cbll=${act.lat},${act.lng}" target="_blank" class="no-print" style="display:inline-block; margin-top:8px; font-size:0.8rem; background:#4285f4; color:white; padding:4px 8px; border-radius:4px; text-decoration:none;"><i class="fa-solid fa-street-view"></i> Phố 360°</a>` : ''}
                         </div>
                     </div>
                 `).join('')}
