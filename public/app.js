@@ -3,6 +3,10 @@ window.placesMap = null;
 window.itineraryMap = null;
 window.currentLang = 'vi';
 
+// --- AUTH LOGIC ---
+let currentUser = JSON.parse(localStorage.getItem('coca_user')) || null;
+let authToken = localStorage.getItem('coca_token') || null;
+
 const translations = {
     vi: {
         pageTitle: "Coca Planner - Chuyên Gia Lên Kế Hoạch Du Lịch",
@@ -333,9 +337,11 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = true;
 
         try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
             const res = await fetch('/api/save-plan', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify({ planData: window.currentPlanData })
             });
             const data = await res.json();
@@ -1103,6 +1109,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const itBounds = [];
         const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'];
         
+        let previousLastLatLng = null;
+
         data.itinerary.forEach((day, dIdx) => {
             const dayColor = colors[dIdx % colors.length];
             const latlngs = [];
@@ -1124,8 +1132,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
+            // Vẽ đường nối trong 1 ngày
             if (latlngs.length > 1) {
                 L.polyline(latlngs, { color: dayColor, weight: 3, dashArray: '5, 10' }).addTo(window.itineraryMap);
+            }
+
+            // Vẽ đường nối xuyên ngày (từ điểm cuối ngày hôm trước đến điểm đầu ngày hôm nay)
+            if (previousLastLatLng && latlngs.length > 0) {
+                L.polyline([previousLastLatLng, latlngs[0]], { color: '#333', weight: 2, dashArray: '2, 6', opacity: 0.5 }).addTo(window.itineraryMap);
+            }
+
+            if (latlngs.length > 0) {
+                previousLastLatLng = latlngs[latlngs.length - 1];
             }
         });
         
@@ -1294,4 +1312,129 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+});
+
+// --- AUTHENTICATION MODULE ---
+let isLoginMode = true;
+
+function updateAuthUI() {
+    const loginBtn = document.getElementById('login-btn');
+    const userInfo = document.getElementById('user-info');
+    const userNameDisplay = document.getElementById('user-name-display');
+    
+    if (currentUser && authToken) {
+        if(loginBtn) loginBtn.style.display = 'none';
+        if(userInfo) userInfo.style.display = 'flex';
+        if(userNameDisplay) userNameDisplay.textContent = currentUser.name;
+    } else {
+        if(loginBtn) loginBtn.style.display = 'block';
+        if(userInfo) userInfo.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateAuthUI();
+
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const authModal = document.getElementById('auth-modal');
+    const closeAuthBtn = document.getElementById('close-auth-modal');
+    const authForm = document.getElementById('auth-form');
+    const switchLink = document.getElementById('auth-switch-link');
+    const switchText = document.getElementById('auth-switch-text');
+    const authTitle = document.getElementById('auth-title');
+    const authError = document.getElementById('auth-error');
+
+    if(loginBtn) loginBtn.addEventListener('click', () => { authModal.classList.remove('hidden'); isLoginMode = true; updateModalText(); });
+    if(closeAuthBtn) closeAuthBtn.addEventListener('click', () => authModal.classList.add('hidden'));
+    if(logoutBtn) logoutBtn.addEventListener('click', () => { localStorage.removeItem('coca_user'); localStorage.removeItem('coca_token'); currentUser = null; authToken = null; updateAuthUI(); });
+
+    if(switchLink) switchLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        isLoginMode = !isLoginMode;
+        updateModalText();
+        authError.style.display = 'none';
+    });
+
+    function updateModalText() {
+        authTitle.textContent = isLoginMode ? 'Đăng nhập' : 'Đăng ký';
+        switchText.textContent = isLoginMode ? 'Chưa có tài khoản?' : 'Đã có tài khoản?';
+        switchLink.textContent = isLoginMode ? 'Đăng ký ngay' : 'Đăng nhập ngay';
+    }
+
+    if(authForm) authForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('auth-email').value;
+        const password = document.getElementById('auth-password').value;
+        const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register';
+        const btn = document.getElementById('auth-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        authError.style.display = 'none';
+
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Lỗi hệ thống');
+            
+            currentUser = data.user;
+            authToken = data.token;
+            localStorage.setItem('coca_user', JSON.stringify(currentUser));
+            localStorage.setItem('coca_token', authToken);
+            updateAuthUI();
+            authModal.classList.add('hidden');
+            authForm.reset();
+        } catch (err) {
+            authError.textContent = err.message;
+            authError.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Tiếp tục';
+        }
+    });
+    });
+});
+
+// --- MY TRIPS LOGIC ---
+document.addEventListener('DOMContentLoaded', () => {
+    const myTripsBtn = document.getElementById('my-trips-btn');
+    const myTripsModal = document.getElementById('my-trips-modal');
+    const closeTripsModal = document.getElementById('close-trips-modal');
+    const tripsList = document.getElementById('trips-list');
+
+    if(myTripsBtn) myTripsBtn.addEventListener('click', async () => {
+        myTripsModal.classList.remove('hidden');
+        tripsList.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin fa-2x"></i></div>';
+        try {
+            const res = await fetch('/api/plans/me', {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            const plans = await res.json();
+            if(!res.ok) throw new Error(plans.error);
+            
+            if(plans.length === 0) {
+                tripsList.innerHTML = '<div style="text-align:center; color:#666; padding:20px;">Bạn chưa lưu chuyến đi nào.</div>';
+                return;
+            }
+            
+            tripsList.innerHTML = '';
+            plans.forEach(p => {
+                const d = p.planData.overview;
+                const card = document.createElement('div');
+                card.className = 'trip-card';
+                card.innerHTML = `<h3>${d.destination} (${d.duration})</h3><p>${d.budget} • ${d.people}</p><p style="font-size:0.8rem; margin-top:5px; color:#999;">Tạo ngày: ${new Date(p.createdAt).toLocaleDateString('vi-VN')}</p>`;
+                card.addEventListener('click', () => {
+                    window.location.href = '?trip=' + p._id;
+                });
+                tripsList.appendChild(card);
+            });
+        } catch(err) {
+            tripsList.innerHTML = `<div style="color:red; text-align:center;">${err.message}</div>`;
+        }
+    });
+    if(closeTripsModal) closeTripsModal.addEventListener('click', () => myTripsModal.classList.add('hidden'));
 });

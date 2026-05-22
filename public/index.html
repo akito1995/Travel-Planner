@@ -53,6 +53,19 @@
         </button>
     </div>
 
+    <!-- Auth Menu (Top Right) -->
+    <div class="auth-menu no-print" style="position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; gap: 10px; align-items: center;">
+        <div id="user-info" style="display: none; align-items: center; gap: 10px; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); padding: 5px 15px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <i class="fa-solid fa-user-circle" style="font-size: 1.2rem; color: var(--primary-blue);"></i>
+            <span id="user-name-display" style="font-weight: 600; font-size: 0.9rem;"></span>
+            <button id="my-trips-btn" class="secondary-btn" style="padding: 4px 10px; font-size: 0.8rem; margin-left: 5px;"><i class="fa-solid fa-plane"></i> My Trips</button>
+            <button id="logout-btn" class="secondary-btn" style="padding: 4px 10px; font-size: 0.8rem; color: #ff4757;"><i class="fa-solid fa-sign-out-alt"></i></button>
+        </div>
+        <button id="login-btn" class="primary-btn" style="padding: 8px 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(37,99,235,0.2);">
+            <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập
+        </button>
+    </div>
+
     <!-- Landing Page -->
     <div id="landing-page" class="view-section active">
         <div class="hero">
@@ -389,6 +402,35 @@
 
     <div id="brochure-template" style="display:none; background:white; color:black; width: 794px; min-height: 1123px; padding: 40px; box-sizing: border-box;">
         <!-- Nội dung sẽ được render bằng JS -->
+    </div>
+
+    <!-- Auth Modal (Minimalist) -->
+    <div id="auth-modal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 20000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
+        <div class="auth-box" style="background: var(--bg-color); width: 90%; max-width: 400px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; transform: translateY(20px); transition: transform 0.3s ease;">
+            <button id="close-auth-modal" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-color);"><i class="fa-solid fa-times"></i></button>
+            <h2 id="auth-title" style="text-align: center; margin-bottom: 20px; font-weight: 700;">Đăng nhập</h2>
+            <form id="auth-form" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="email" id="auth-email" placeholder="Email của bạn" required style="padding: 12px 15px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); font-family: inherit; font-size: 1rem; background: var(--input-bg); color: var(--text-color); outline: none;">
+                <input type="password" id="auth-password" placeholder="Mật khẩu" required style="padding: 12px 15px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); font-family: inherit; font-size: 1rem; background: var(--input-bg); color: var(--text-color); outline: none;">
+                <p id="auth-error" style="color: #ff4757; font-size: 0.85rem; text-align: center; margin: 0; display: none;"></p>
+                <button type="submit" id="auth-submit-btn" class="primary-btn" style="width: 100%; padding: 12px; border-radius: 10px; font-size: 1rem;">Tiếp tục</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: #666;">
+                <span id="auth-switch-text">Chưa có tài khoản?</span> 
+                <a href="#" id="auth-switch-link" style="color: var(--primary-blue); font-weight: 600; text-decoration: none;">Đăng ký ngay</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- My Trips Modal -->
+    <div id="my-trips-modal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 20000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
+        <div class="trips-box" style="background: var(--bg-color); width: 90%; max-width: 800px; height: 80vh; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; display: flex; flex-direction: column;">
+            <button id="close-trips-modal" style="position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-color);"><i class="fa-solid fa-times"></i></button>
+            <h2 style="margin-bottom: 20px; font-weight: 700;"><i class="fa-solid fa-plane-departure"></i> Hành trình của tôi</h2>
+            <div id="trips-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 10px;">
+                <!-- Danh sách chuyến đi sẽ được render ở đây -->
+            </div>
+        </div>
     </div>
 
     <!-- Chart.js -->

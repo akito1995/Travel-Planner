@@ -56,14 +56,28 @@ async function generateWithRetry(prompt) {
 
 // Schema cho Lịch trình
 const planSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
     planData: { type: Object, required: true },
-    createdAt: { type: Date, default: Date.now, expires: '30d' } // Tự động xóa sau 30 ngày để tiết kiệm dung lượng
+    createdAt: { type: Date, default: Date.now } // Bỏ expires để giữ lại vĩnh viễn nếu có userId (Sẽ fix logic xóa ở phần khác)
 });
 const Plan = mongoose.model('Plan', planSchema);
 
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'coca_planner_super_secret_key_2026';
+
+// Schema cho User
+const userSchema = new mongoose.Schema({
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    name: { type: String, default: 'Traveler' },
+    createdAt: { type: Date, default: Date.now }
+});
+const User = mongoose.model('User', userSchema);
 
 // Schema cho AI Cache (Lưu kết quả tìm kiếm giống nhau)
 const aiCacheSchema = new mongoose.Schema({
@@ -74,8 +88,72 @@ const aiCacheSchema = new mongoose.Schema({
 const AiCache = mongoose.model('AiCache', aiCacheSchema);
 
 // Middleware
+// Middleware Auth
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token == null) return next(); // Not logged in, proceed as guest
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (!err) {
+            req.user = user;
+        }
+        next();
+    });
+};
+
 app.use(cors());
 app.use(express.json());
+app.use(authenticateToken);
+
+// --- AUTH API ---
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) return res.status(400).json({ error: 'Vui lòng nhập đầy đủ email và mật khẩu' });
+        
+        const existingUser = await User.findOne({ email });
+        if (existingUser) return res.status(400).json({ error: 'Email này đã được sử dụng' });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const name = email.split('@')[0];
+        
+        const user = new User({ email, password: hashedPassword, name });
+        await user.save();
+        
+        const token = jwt.sign({ userId: user._id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '30d' });
+        res.json({ token, user: { name: user.name, email: user.email } });
+    } catch (err) {
+        res.status(500).json({ error: 'Lỗi máy chủ' });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.status(400).json({ error: 'Tài khoản không tồn tại' });
+
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) return res.status(400).json({ error: 'Sai mật khẩu' });
+
+        const token = jwt.sign({ userId: user._id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '30d' });
+        res.json({ token, user: { name: user.name, email: user.email } });
+    } catch (err) {
+        res.status(500).json({ error: 'Lỗi máy chủ' });
+    }
+});
+
+// Lấy danh sách lịch trình của tôi
+app.get('/api/plans/me', async (req, res) => {
+    if (!req.user) return res.status(401).json({ error: 'Chưa đăng nhập' });
+    try {
+        const plans = await Plan.find({ userId: req.user.userId }).sort({ createdAt: -1 });
+        res.json(plans);
+    } catch (err) {
+        res.status(500).json({ error: 'Lỗi máy chủ' });
+    }
+});
 
 // SEO Interceptor cho tính năng Share Link
 app.get('/', async (req, res, next) => {
@@ -425,7 +503,10 @@ app.post('/api/weather', async (req, res) => {
 app.post('/api/save-plan', async (req, res) => {
     try {
         const { planData } = req.body;
-        const newPlan = new Plan({ planData });
+        const newPlan = new Plan({ 
+            planData,
+            userId: req.user ? req.user.userId : undefined
+        });
         const savedPlan = await newPlan.save();
         res.json({ id: savedPlan._id });
     } catch (err) {
