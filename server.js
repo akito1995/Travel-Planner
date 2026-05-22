@@ -15,7 +15,7 @@ mongoose.connect(mongoURI)
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 async function generateWithRetry(prompt) {
-    const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+    const modelsToTry = ['gemini-2.5-flash'];
     
     for (let modelName of modelsToTry) {
         let retries = 2; // Thử 2 lần cho mỗi model
