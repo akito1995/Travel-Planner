@@ -1396,9 +1396,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.textContent = 'Tiếp tục';
         }
     });
-    });
 });
-
 // --- MY TRIPS LOGIC ---
 document.addEventListener('DOMContentLoaded', () => {
     const myTripsBtn = document.getElementById('my-trips-btn');

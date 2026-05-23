@@ -805,7 +805,7 @@ button {
 /* Watermark */
 .watermark {
     position: fixed;
-    top: 15px;
+    bottom: 15px;
     right: 20px;
     font-size: 0.85rem;
     color: var(--text-muted);
