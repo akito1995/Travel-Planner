@@ -672,19 +672,27 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.error(err));
         }
 
-        // Setup Affiliate Links
+        // Setup Affiliate Deep Linking
         const destQuery = encodeURIComponent(window.currentPlanData.input.destination);
-        const sd = window.currentPlanData.input.startDate;
-        const ed = window.currentPlanData.input.endDate;
-        // Trip.com: Chuyển hướng sang tìm kiếm Vé máy bay thay vì khách sạn
-        document.getElementById('link-tripcom').href = `https://vn.trip.com/flights/`;
-        document.getElementById('link-booking').href = `https://www.booking.com/searchresults.html?ss=${destQuery}&checkin=${sd}&checkout=${ed}`;
-        document.getElementById('link-klook').href = `https://klook.tpx.lv/Z2t2ILK7`;
+        const departure = encodeURIComponent(window.currentPlanData.input.departure || '');
+        const sd = window.currentPlanData.input.startDate || '';
+        const ed = window.currentPlanData.input.endDate || '';
+        const adults = window.currentPlanData.input.adults || 1;
+        const children = window.currentPlanData.input.children || 0;
+
+        // Trip.com: Flight deep link
+        document.getElementById('link-tripcom').href = `https://vn.trip.com/flights/?dcity=${departure}&acity=${destQuery}`;
         
-        // Smart Hotel Booking Widget
+        // Booking.com: Hotel deep link with full constraints
+        document.getElementById('link-booking').href = `https://www.booking.com/searchresults.html?ss=${destQuery}&checkin=${sd}&checkout=${ed}&group_adults=${adults}&group_children=${children}&no_rooms=1`;
+        
+        // Klook: Activity deep link
+        document.getElementById('link-klook').href = `https://www.klook.com/vi/search/result/?query=${destQuery}`;
+        
+        // Smart Hotel Booking Widget (if exists)
         const smartBtn = document.getElementById('smart-booking-btn');
         if (smartBtn) {
-            smartBtn.href = `https://www.booking.com/searchresults.html?ss=${destQuery}&checkin=${sd}&checkout=${ed}&aid=231123`; // Fake AID for demo
+            smartBtn.href = `https://www.booking.com/searchresults.html?ss=${destQuery}&checkin=${sd}&checkout=${ed}&group_adults=${adults}&group_children=${children}&no_rooms=1&aid=231123`; 
         }
 
         // Tab: Visa
@@ -753,7 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         document.getElementById('hotel-content').innerHTML = data.places.hotels.map((h, i) => {
             const img = h.img || hotelImgs[i % hotelImgs.length];
-            const hotelSearchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(h.name + ' ' + window.currentPlanData.input.destination)}&checkin=${sd}&checkout=${ed}`;
+            const hotelSearchUrl = `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(h.name + ' ' + window.currentPlanData.input.destination)}&checkin=${sd}&checkout=${ed}&group_adults=${adults}&group_children=${children}&no_rooms=1`;
             return `
             <div class="place-card">
                 <a href="${hotelSearchUrl}" target="_blank" style="display:block; position:relative;">
