@@ -309,33 +309,33 @@ button {
 #loading-page {
     align-items: center;
     justify-content: center;
-    background: var(--deep-ocean);
+    background: var(--bg-light);
 }
 #loading-page.active {
     display: flex;
 }
 
-.loader-container {
-    text-align: center;
-    color: var(--white);
+.skeleton-container {
+    width: 100%;
 }
 
-.spinner {
-    width: 60px;
-    height: 60px;
-    border: 5px solid rgba(255,255,255,0.2);
-    border-top-color: var(--secondary-blue);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
+.skeleton-block {
+    background-color: #e0e0e0;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.skeleton-pulse {
+    animation: skeleton-loading 1.5s ease-in-out infinite alternate;
 }
 
-.loader-text {
-    color: var(--white);
+@keyframes skeleton-loading {
+    0% {
+        opacity: 0.5;
+        background-color: #e0e0e0;
+    }
+    100% {
+        opacity: 1;
+        background-color: #f0f0f0;
+    }
 }
 
 /* Result Dashboard */
@@ -564,27 +564,33 @@ button {
 }
 
 .time-slot {
-    display: flex;
+    display: block;
     margin-bottom: 15px;
     background: var(--white);
     padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    position: relative;
+    border: 1px solid transparent;
+    transition: all 0.2s;
 }
 
-.time-label {
-    min-width: 80px;
-    font-weight: 600;
-    color: var(--secondary-blue);
+.time-slot:hover {
+    border-color: #eee;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.time-content h5 {
-    margin-bottom: 5px;
+.time-slot.expanded .time-content {
+    display: block !important;
+}
+
+.time-slot.expanded .accordion-icon {
+    transform: rotate(180deg);
 }
 
 .time-content p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+    color: #555;
+    font-size: 0.95rem;
 }
 
 /* Table */

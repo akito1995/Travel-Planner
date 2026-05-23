@@ -1118,6 +1118,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Lịch Trình Editing Logic ---
+    window.toggleAllAccordions = () => {
+        const slots = document.querySelectorAll('.time-slot');
+        const isAnyCollapsed = Array.from(slots).some(s => !s.classList.contains('expanded'));
+        
+        slots.forEach(s => {
+            if (isAnyCollapsed) {
+                s.classList.add('expanded');
+            } else {
+                s.classList.remove('expanded');
+            }
+        });
+        
+        const btn = document.getElementById('btn-expand-all');
+        if (btn) {
+            if (isAnyCollapsed) {
+                btn.innerHTML = '<i class="fa-solid fa-down-left-and-up-right-to-center"></i> Thu gọn thông tin';
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-up-right-and-down-left-from-center"></i> Mở rộng thông tin';
+            }
+        }
+    };
+
     window.renderItinerary = () => {
         if (!window.currentPlanData) return;
         const data = window.currentPlanData;
@@ -1125,20 +1147,28 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="day-block">
                 <div class="day-header">Ngày ${day.day}: ${day.title}</div>
                 ${day.activities.map((act, aIdx) => `
-                    <div class="time-slot">
-                        <div class="edit-controls no-print" style="z-index: 100;">
+                    <div class="time-slot" style="cursor: pointer;" onclick="this.classList.toggle('expanded')">
+                        <div class="edit-controls no-print" style="z-index: 100;" onclick="event.stopPropagation();">
                             <button class="act-btn edit-btn" data-didx="${dIdx}" data-aidx="${aIdx}" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                             <button class="act-btn swap-btn" data-didx="${dIdx}" data-aidx="${aIdx}" title="Đổi địa điểm bằng AI"><i class="fa-solid fa-rotate"></i></button>
                             <button class="act-btn delete-btn" data-didx="${dIdx}" data-aidx="${aIdx}" title="Xóa"><i class="fa-solid fa-trash"></i></button>
                         </div>
-                        <div class="time-label">
-                            <strong>${act.session}</strong><br>
-                            <small style="color:#666;">${act.timeRange}</small>
+                        
+                        <div class="time-slot-header" style="display: flex; align-items: center; gap: 15px;">
+                            <div class="time-label" style="min-width: 80px; font-weight: 700; color: var(--primary-blue); font-size: 0.95rem; text-align: right;">
+                                ${act.session === 'Buổi sáng' ? '<i class="fa-solid fa-sun" style="color: #f1c40f; margin-right: 4px;"></i>' : (act.session === 'Buổi chiều' ? '<i class="fa-solid fa-cloud-sun" style="color: #e67e22; margin-right: 4px;"></i>' : '<i class="fa-solid fa-moon" style="color: #34495e; margin-right: 4px;"></i>')}
+                                <br><small style="color:#666; font-size: 0.8rem; font-weight: normal;">${act.timeRange}</small>
+                            </div>
+                            
+                            <div class="time-title" style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+                                <h5 style="margin: 0; font-size: 1.1rem;">${act.title}</h5>
+                                <i class="fa-solid fa-chevron-down accordion-icon" style="color: #ccc; transition: 0.3s;"></i>
+                            </div>
                         </div>
-                        <div class="time-content">
-                            <h5>${act.title}</h5>
-                            <p>${act.desc}</p>
-                            ${act.lat && act.lng ? `<a href="https://www.google.com/maps?layer=c&cbll=${act.lat},${act.lng}" target="_blank" class="no-print" style="display:inline-block; margin-top:8px; font-size:0.8rem; background:#4285f4; color:white; padding:4px 8px; border-radius:4px; text-decoration:none;"><i class="fa-solid fa-street-view"></i> Phố 360°</a>` : ''}
+
+                        <div class="time-content" style="margin-left: 95px; padding-top: 10px; display: none;">
+                            <p style="margin-bottom: 10px; line-height: 1.5; color: #444;">${act.desc}</p>
+                            ${act.lat && act.lng ? `<a href="https://www.google.com/maps?layer=c&cbll=${act.lat},${act.lng}" target="_blank" class="no-print" style="display:inline-block; font-size:0.85rem; background:#f4f7f6; color:#333; padding:6px 12px; border-radius:20px; text-decoration:none; border: 1px solid #ddd;" onclick="event.stopPropagation();"><i class="fa-solid fa-street-view" style="color: #4285f4;"></i> Phố 360°</a>` : ''}
                         </div>
                     </div>
                 `).join('')}
