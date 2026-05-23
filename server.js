@@ -287,6 +287,7 @@ YÊU CẦU QUAN TRỌNG:
     { "item": "Phí xin Visa (Bắt buộc nếu có)", "detail": "Lệ phí ĐSQ / Dịch vụ", "price": 1000000 },
     { "item": "Lưu trú", "detail": "X đêm", "price": 1500000 },
     { "item": "Ăn uống", "detail": "Y ngày", "price": 1000000 },
+    { "item": "Di chuyển giữa các thành phố (Nếu lộ trình có nhiều thành phố)", "detail": "Vé tàu/xe/máy bay nội địa giữa các điểm đến", "price": 1500000 },
     { "item": "Di chuyển tại điểm đến", "detail": "Ưu tiên phương tiện công cộng (MRT, Tàu điện, Bus) để tiết kiệm", "price": 500000 },
     { "item": "Vé tham quan & Vui chơi", "detail": "Các điểm đến nổi bật", "price": 1000000 }
   ],
@@ -294,7 +295,7 @@ YÊU CẦU QUAN TRỌNG:
 }
 Chú ý: 
 1. Các mức giá (price) trong mảng 'cost' BẮT BUỘC phải là SỐ NGUYÊN (number), tính trên 1 người. VD: 2000000. Không dùng chuỗi string.
-2. BẮT BUỘC phải đưa chi phí vé máy bay khứ hồi và phí Visa (nếu điểm đến yêu cầu) vào dự toán.
+2. BẮT BUỘC phải đưa chi phí vé máy bay khứ hồi và phí Visa (nếu điểm đến yêu cầu) vào dự toán. Nếu lộ trình đi qua nhiều thành phố, PHẢI tách riêng chi phí "Di chuyển giữa các thành phố" (như Shinkansen, KTX, máy bay nội địa) khỏi "Di chuyển tại điểm đến".
 3. Khi di chuyển tại điểm đến, luôn ưu tiên các phương tiện công cộng giá rẻ như MRT, tàu điện ngầm, hoặc xe buýt thay vì taxi hay xe đưa đón riêng để tiết kiệm chi phí.
 4. TÍCH HỢP TÌM KIẾM: Hãy tìm kiếm thông tin trên Internet để lấy thông tin giá phòng khách sạn và giá nhà hàng/quán ăn thực tế, sát với thời điểm hiện tại nhất (không tự bịa giá).`;
 
