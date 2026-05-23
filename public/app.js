@@ -1415,7 +1415,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(!res.ok) throw new Error(plans.error);
             
             if(plans.length === 0) {
-                tripsList.innerHTML = '<div style="text-align:center; color:#666; padding:20px;">Bạn chưa lưu chuyến đi nào.</div>';
+                tripsList.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">Bạn chưa lưu chuyến đi nào.</div>';
                 return;
             }
             
