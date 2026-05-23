@@ -962,9 +962,9 @@ button {
 .sortable-drag { cursor: grabbing !important; }
 
 /* Auth & Modals */
-.modal-overlay.hidden { display: none !important; }
-.modal-overlay:not(.hidden) { opacity: 1 !important; pointer-events: auto !important; }
-.modal-overlay:not(.hidden) > div { transform: translateY(0) !important; }
+#auth-modal.hidden, #my-trips-modal.hidden { display: none !important; }
+#auth-modal:not(.hidden), #my-trips-modal:not(.hidden) { opacity: 1 !important; pointer-events: auto !important; }
+#auth-modal:not(.hidden) > div, #my-trips-modal:not(.hidden) > div { transform: translateY(0) !important; }
 .trips-box { overflow: hidden; }
 .trip-card { background: var(--input-bg); border: 1px solid rgba(0,0,0,0.05); border-radius: 12px; padding: 15px; cursor: pointer; transition: all 0.2s ease; }
 .trip-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); border-color: var(--primary-blue); }
