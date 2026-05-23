@@ -330,6 +330,47 @@ document.addEventListener('DOMContentLoaded', () => {
         switchView('form');
     });
 
+    document.getElementById('btn-save').addEventListener('click', async () => {
+        if (!authToken) {
+            alert('Vui lòng đăng nhập để lưu hành trình vào My Trips!');
+            document.getElementById('auth-modal').classList.remove('hidden');
+            return;
+        }
+
+        const btn = document.getElementById('btn-save');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+        btn.disabled = true;
+
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            headers['Authorization'] = `Bearer ${authToken}`;
+            const res = await fetch('/api/save-plan', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ planData: window.currentPlanData })
+            });
+            const data = await res.json();
+            if (data.id) {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Đã lưu thành công!';
+                if (window.history.pushState) {
+                    window.history.pushState({}, document.title, '?trip=' + data.id);
+                }
+            } else {
+                alert('Lỗi: ' + data.error);
+                btn.innerHTML = originalText;
+            }
+        } catch (e) {
+            alert('Lỗi kết nối: ' + e.message);
+            btn.innerHTML = originalText;
+        }
+
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 3000);
+    });
+
     document.getElementById('btn-share').addEventListener('click', async () => {
         const btn = document.getElementById('btn-share');
         const originalText = btn.innerHTML;
@@ -1421,10 +1462,16 @@ document.addEventListener('DOMContentLoaded', () => {
             
             tripsList.innerHTML = '';
             plans.forEach(p => {
-                const d = p.planData.overview;
+                const d = p.planData.input || {};
+                const dest = d.destination || 'Chuyến đi chưa xác định';
+                const days = d.days ? `${d.days} ngày` : 'Chưa rõ';
+                const budget = d.budget ? formatMoney(d.budget) : 'Chưa rõ';
+                const people = (d.adults || 0) + (d.children || 0);
+                const peopleText = people > 0 ? `${people} người` : 'Chưa rõ';
+                
                 const card = document.createElement('div');
                 card.className = 'trip-card';
-                card.innerHTML = `<h3>${d.destination} (${d.duration})</h3><p>${d.budget} • ${d.people}</p><p style="font-size:0.8rem; margin-top:5px; color:#999;">Tạo ngày: ${new Date(p.createdAt).toLocaleDateString('vi-VN')}</p>`;
+                card.innerHTML = `<h3>${dest} (${days})</h3><p>${budget} • ${peopleText}</p><p style="font-size:0.8rem; margin-top:5px; color:var(--text-muted);">Tạo ngày: ${new Date(p.createdAt).toLocaleDateString('vi-VN')}</p>`;
                 card.addEventListener('click', () => {
                     window.location.href = '?trip=' + p._id;
                 });
